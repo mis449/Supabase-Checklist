@@ -378,7 +378,9 @@ export const fetchGivenByDataApi = async () => {
         try {
           const parsed = JSON.parse(name);
           name = parsed.given_by || parsed.name || name;
-        } catch (e) { }
+        } catch {
+          // Fallback to original name if parsing fails
+        }
       }
       return { id: d.id, given_by: name };
     });

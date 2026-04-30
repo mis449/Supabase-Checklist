@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Bell, Plus, Trash2, Shield, User, Globe, Clock, Loader2, X, CheckCheck } from "lucide-react";
+import { Bell, Plus, Trash2, Shield, User, Globe, Clock, Loader2, CheckCheck } from "lucide-react";
 import AdminLayout from "../../components/layout/AdminLayout";
 import { fetchNotifications, createNotification, removeNotification, markAsRead } from "../../redux/slice/notificationSlice";
 import { useMagicToast } from "../../context/MagicToastContext";
@@ -10,7 +10,6 @@ export default function Notifications() {
   const { showToast } = useMagicToast();
   const { list, loading } = useSelector((state) => state.notifications);
   const currentUserRole = (localStorage.getItem("role") || "").toLowerCase();
-  const currentUsername = (localStorage.getItem("user-name") || "Admin");
   const currentUserId = localStorage.getItem("user-id");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,7 +47,7 @@ export default function Notifications() {
       setIsModalOpen(false);
       setFormData({ title: "", message: "", roleTarget: "all" });
     } catch (err) {
-      showToast(err || "Failed to create notification", "error");
+      showToast(err?.message || "Failed to create notification", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -59,7 +58,7 @@ export default function Notifications() {
     try {
       await dispatch(removeNotification(id)).unwrap();
       showToast("Notification deleted", "success");
-    } catch (err) {
+    } catch (_err) {
       showToast("Failed to delete notification", "error");
     }
   };

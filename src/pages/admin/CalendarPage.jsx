@@ -857,7 +857,7 @@ const CalendarPage = () => {
                                                                         <ShieldAlert size={12} className="text-orange-500" /> Final Assessment Feedback
                                                                     </p>
                                                                     <p className="text-xs font-bold text-gray-600 italic leading-relaxed">
-                                                                        "{ (task.remark || task.remarks).replace(/Voice Note Link:?\s*/i, '').trim() }"
+                                                                        &quot;{ (task.remark || task.remarks).replace(/Voice Note Link:?\s*/i, '').trim() }&quot;
                                                                     </p>
                                                                 </div>
                                                             )}

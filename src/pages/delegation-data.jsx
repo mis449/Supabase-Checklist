@@ -1,12 +1,9 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react"
-import { CheckCircle2, Trash2, X, Search, Play, Pause, Edit, Save, Mic, Square } from "lucide-react"
+import { useState, useEffect, useCallback, useMemo } from "react"
+import { Trash2, Edit } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import { deleteDelegationTask, uniqueDelegationTaskData, updateDelegationTask } from "../redux/slice/quickTaskSlice"
-import { ReactMediaRecorder } from "react-media-recorder"
 import supabase from "../SupabaseClient"
-import AudioPlayer from "../components/AudioPlayer"
 import { useMagicToast } from "../context/MagicToastContext"
-
 import RenderDescription from '../components/RenderDescription';
 
 const isAudioUrl = (url) => {
@@ -28,20 +25,14 @@ const CONFIG = {
 function DelegationPage({
   searchTerm = "",
   freqFilter = "",
-  setFreqFilter,
   departmentFilter = "",
-  showLayout = true,
   externalSelectedTasks = null,
   onSelectionChange = null,
   onDelete = null,
   isExternalDeleting = false,
-  departments = [],
-  givenByList = [],
-  doersList = [],
   onEdit = null
 }) {
   const { showToast } = useMagicToast();
-  const [error, setError] = useState(null)
   const [userRole, setUserRole] = useState("")
   const [username, setUsername] = useState("")
   const [isInitialized, setIsInitialized] = useState(false)

@@ -274,7 +274,7 @@ function StaffTasksPage() {
                                 )}
                                 {searchQuery && (
                                     <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                                        Search: "{searchQuery}"
+                                        Search: &quot;{searchQuery}&quot;
                                     </span>
                                 )}
                             </div>
@@ -300,14 +300,14 @@ function StaffTasksPage() {
                                 <div className="text-center p-8 text-gray-500">
                                     {searchQuery ? (
                                         <div>
-                                            <p>No staff members found matching "{searchQuery}"</p>
+                                            <p>No staff members found matching &quot;{searchQuery}&quot;</p>
                                             <p className="text-sm mt-2">Try adjusting your search terms</p>
                                         </div>
                                     ) : (
                                         <div>
                                             <p>No staff data found.</p>
                                             {dashboardStaffFilter !== "all" && (
-                                                <p className="text-sm mt-2">Try selecting "All Staff" to see more results.</p>
+                                                <p className="text-sm mt-2">Try selecting &quot;All Staff&quot; to see more results.</p>
                                             )}
                                         </div>
                                     )}

@@ -196,9 +196,9 @@ export default function AdminApprovalPage() {
         try {
             if (activeTab === "delegation") {
                 await dispatch(updateDelegationDoneStatus({
-                    id: task.id,
+                    id: task.done_id || task.id,
                     status: 'done',
-                    taskId: task.task_id
+                    taskId: task.task_id || task.id
                 })).unwrap();
             } else if (activeTab === "maintenance") {
                 await approveMaintenanceTask(task.id);
@@ -274,9 +274,9 @@ export default function AdminApprovalPage() {
             try {
                 if (activeTab === "delegation") {
                     await dispatch(updateDelegationDoneStatus({
-                        id: task.id,
+                        id: task.done_id || task.id,
                         status: 'done',
-                        taskId: task.task_id
+                        taskId: task.task_id || task.id
                     })).unwrap();
                 } else if (activeTab === "maintenance") {
                     await approveMaintenanceTask(task.id);
@@ -352,7 +352,7 @@ export default function AdminApprovalPage() {
 
         try {
             if (activeTab === "delegation") {
-                await rejectDelegationTask(task.id, task.task_id, reason);
+                await rejectDelegationTask(task.done_id || task.id, task.task_id || task.id, reason);
             } else if (activeTab === "maintenance") {
                 await rejectMaintenanceTask(task.id, reason);
             } else if (activeTab === "repair") {

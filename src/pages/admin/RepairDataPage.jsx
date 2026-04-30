@@ -1,6 +1,6 @@
 "use client"
-import { useState, useEffect, useMemo, useRef } from "react"
-import { Search, Edit, X, Loader2, Save, Wrench, Calendar, Filter, History, ArrowLeft, Play, Pause } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
+import { Search, Edit, X, Loader2, Save, Wrench, History, ArrowLeft } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import { repairData, repairHistoryData, updateRepair } from "../../redux/slice/repairSlice"
 import AdminLayout from "../../components/layout/AdminLayout"
@@ -23,15 +23,15 @@ export default function RepairPendingPage({ showLayout = true }) {
 
     const dispatch = useDispatch()
     const repairState = useSelector((state) => state.repair);
-    const repairList = repairState?.repair || [];
-    const historyList = repairState?.history || [];
-
+    
     useEffect(() => {
         dispatch(repairData(1))
         dispatch(repairHistoryData(1))
     }, [dispatch])
 
     const filteredData = useMemo(() => {
+        const repairList = repairState?.repair || [];
+        const historyList = repairState?.history || [];
         const sourceData = showHistory ? historyList : repairList;
         return sourceData.filter(item => {
             const matchesPerson = searchPerson
@@ -50,7 +50,7 @@ export default function RepairPendingPage({ showLayout = true }) {
             }
             return matchesPerson && matchesDate;
         });
-    }, [repairList, historyList, searchPerson, dateRange, showHistory]);
+    }, [repairState, searchPerson, dateRange, showHistory]);
 
     const openUpdateModal = (task) => {
         setSelectedTask(task);

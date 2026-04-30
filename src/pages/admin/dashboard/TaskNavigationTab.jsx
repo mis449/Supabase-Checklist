@@ -906,7 +906,7 @@ export default function TaskNavigationTabs({
 
             {!hasMoreData && displayedTasks.length > 0 && (
               <div className="text-center py-8 text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">
-                You've reached the end
+                You&apos;ve reached the end
               </div>
             )}
           </div>

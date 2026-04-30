@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, User, Building, X, Save, Edit, Trash2, Search, ChevronDown, Calendar, RefreshCw } from 'lucide-react';
+import { Plus, User, Building, X, Save, Edit, Trash2, Search, ChevronDown, Calendar, RefreshCw, Settings } from 'lucide-react';
 import AdminLayout from '../components/layout/AdminLayout';
 import { useDispatch, useSelector } from 'react-redux';
-import { createDepartment, createUser, deleteUser, departmentOnlyDetails, givenByDetails, departmentDetails, updateDepartment, updateUser, userDetails, customDropdownDetails, createCustomDropdown, deleteCustomDropdown, createAssignFrom, deleteDepartment, deleteAssignFrom, updateCustomDropdown, updateAssignFrom, uploadProfileImage } from '../redux/slice/settingSlice';
+import { createDepartment, createUser, deleteUser, departmentOnlyDetails, givenByDetails, departmentDetails, updateDepartment, updateUser, userDetails, customDropdownDetails, createCustomDropdown, deleteCustomDropdown, createAssignFrom, deleteDepartment, deleteAssignFrom, updateCustomDropdown, updateAssignFrom, uploadProfileImage, createMachineEntries } from '../redux/slice/settingSlice';
+import { uploadPartImageApi } from '../redux/api/settingApi';
 
 import supabase from '../SupabaseClient';
 import CalendarComponent from '../components/CalendarComponent';
@@ -494,6 +495,7 @@ const Setting = () => {
     name: '',
     givenBy: ''
   });
+  const [inputParts, setInputParts] = useState([{ name: '', file: null, preview: null }]);
 
   useEffect(() => {
     dispatch(userDetails({ role: userRole, username }));
@@ -2123,7 +2125,7 @@ const Setting = () => {
 
                   {deptForm.name === "Temperature" && (
                     <p className="text-xs text-amber-600 ml-1 mt-1 font-bold">
-                      ⚠️ Temperature strictly uses: 'Low', 'Medium', 'High'
+                      ⚠️ Temperature strictly uses: &apos;Low&apos;, &apos;Medium&apos;, &apos;High&apos;
                     </p>
                   )}
 
@@ -2178,7 +2180,7 @@ const Setting = () => {
 
               <div className="px-8 py-8 text-center">
                 <p className="text-sm text-gray-500 leading-relaxed mb-6">
-                  Are you absolutely certain about deleting <span className="text-red-600 font-extrabold">"{userToDeleteData.name}"</span>?
+                  Are you absolutely certain about deleting <span className="text-red-600 font-extrabold">&quot;{userToDeleteData.name}&quot;</span>?
                 </p>
 
                 <div className="bg-amber-50 border border-amber-100 rounded-[1.5rem] p-5 text-left mb-8">

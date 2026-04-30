@@ -3,8 +3,7 @@ import { useState, useEffect, useMemo } from "react"
 import AdminLayout from "../../components/layout/AdminLayout"
 import { useDispatch, useSelector } from "react-redux"
 import { maintenanceData, maintenanceHistoryData, updateMaintenance } from "../../redux/slice/maintenanceSlice"
-import { Search, History, ArrowLeft, CheckCircle2, X, Upload, Save, Loader2, Play, Pause } from "lucide-react"
-import { useRef } from "react"
+import { Search, History, ArrowLeft, CheckCircle2, X, Upload, Save, Loader2 } from "lucide-react"
 import RenderDescription from "../../components/RenderDescription"
 
 
@@ -20,13 +19,20 @@ export default function MaintenanceDataPage({ showLayout = true }) {
 
     const dispatch = useDispatch()
     const maintenanceState = useSelector((state) => state.maintenance);
-    const maintenance = maintenanceState?.maintenance || [];
-    const history = maintenanceState?.history || [];
+    const maintenance = useMemo(() => maintenanceState?.maintenance || [], [maintenanceState?.maintenance]);
+    const history = useMemo(() => maintenanceState?.history || [], [maintenanceState?.history]);
 
     useEffect(() => {
         dispatch(maintenanceData(1))
         dispatch(maintenanceHistoryData(1))
     }, [dispatch])
+
+    const filteredData = useMemo(() => {
+        const data = showHistory ? history : maintenance;
+        if (!searchTerm) return data;
+        const lower = searchTerm.toLowerCase();
+        return data.filter(item => Object.values(item).some(v => v && String(v).toLowerCase().includes(lower)));
+    }, [maintenance, history, searchTerm, showHistory]);
 
     const handleCheckboxClick = (e, id) => {
         e.stopPropagation()
@@ -97,12 +103,6 @@ export default function MaintenanceDataPage({ showLayout = true }) {
         }
     }
 
-    const filteredData = useMemo(() => {
-        const data = showHistory ? history : maintenance
-        if (!searchTerm) return data
-        const lower = searchTerm.toLowerCase()
-        return data.filter(item => Object.values(item).some(v => v && String(v).toLowerCase().includes(lower)))
-    }, [maintenance, history, searchTerm, showHistory])
 
     const content = (
         <div className="space-y-4 h-[calc(100vh-100px)] flex flex-col">

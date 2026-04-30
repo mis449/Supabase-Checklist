@@ -1,6 +1,6 @@
 "use client"
-import { useState, useEffect, useCallback, useMemo, useRef } from "react"
-import { CheckCircle2, Upload, X, Search, History, ArrowLeft, Filter, Calendar, Save, Loader2 } from "lucide-react"
+import { useState, useEffect, useMemo, useRef } from "react"
+import { CheckCircle2, Upload, Search, History, ArrowLeft, Save, Loader2, X } from "lucide-react"
 import AdminLayout from "../../components/layout/AdminLayout"
 import { useDispatch, useSelector } from "react-redux"
 import { checklistData, checklistHistoryData, updateChecklist } from "../../redux/slice/checklistSlice"
@@ -411,7 +411,7 @@ export default function AccountDataPage({ showLayout = true, departmentFilter = 
                     <td className="px-3 py-4 align-top">
                       {showHistory ? (
                         item.image ? (
-                          <a href={item.image} target="_blank" className="text-purple-600 hover:text-purple-800 hover:underline text-sm flex items-center gap-1 font-medium">
+                          <a href={item.image} target="_blank" rel="noreferrer" className="text-purple-600 hover:text-purple-800 hover:underline text-sm flex items-center gap-1 font-medium">
                             <CheckCircle2 className="w-3 h-3" /> View
                           </a>
                         ) : <span className="text-gray-300 text-sm">-</span>

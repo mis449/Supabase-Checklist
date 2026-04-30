@@ -174,7 +174,7 @@ function TaskCard({ task, index, total, department, doerName, givenBy, dispatch,
                 {/* Doer */}
                 <div>
                     <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
-                        Doer's Name <span className="text-red-500">*</span>
+                        Doer&apos;s Name <span className="text-red-500">*</span>
                     </label>
                     <select
                         name="doer"

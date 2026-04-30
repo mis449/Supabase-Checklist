@@ -7,24 +7,18 @@ import {
   Search,
   History,
   ArrowLeft,
-  Filter,
-  Play,
-  Pause,
-  BellRing,
   ChevronLeft,
   ChevronRight,
   Edit
 } from "lucide-react";
-import { useRef } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
-import AudioPlayer from "../components/AudioPlayer";
 import { useDispatch, useSelector } from "react-redux";
 import {
   delegation_DoneData,
   delegationData,
 } from "../redux/slice/delegationSlice";
 import { insertDelegationDoneAndUpdate, updateDelegationTask } from "../redux/api/delegationApi";
-import { sendUrgentTaskNotification, sendTaskExtensionNotification } from "../services/whatsappService";
+import { sendTaskExtensionNotification } from "../services/whatsappService";
 import { useMagicToast } from "../context/MagicToastContext";
 import RenderDescription, { MediaViewer } from "../components/RenderDescription";
 
@@ -64,15 +58,12 @@ function useDebounce(value, delay) {
 function DelegationDataPage() {
   const { showToast } = useMagicToast();
   const [uploadedImages, setUploadedImages] = useState({});
-  const [accountData, setAccountData] = useState([]);
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [additionalData, setAdditionalData] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
   const [remarksData, setRemarksData] = useState({});
-  const [historyData, setHistoryData] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [statusData, setStatusData] = useState({});
   const [nextTargetDate, setNextTargetDate] = useState({});
@@ -245,15 +236,6 @@ function DelegationDataPage() {
     [parseGoogleSheetsDateTime]
   );
 
-  const parseDateFromDDMMYYYY = useCallback((dateStr) => {
-    if (!dateStr || typeof dateStr !== "string") return null;
-
-    const datePart = dateStr.split(" ")[0];
-    const parts = datePart.split("/");
-    if (parts.length !== 3) return null;
-    return new Date(parts[2], parts[1] - 1, parts[0]);
-  }, []);
-
   const resetFilters = useCallback(() => {
     setSearchTerm("");
     setStartDate("");
@@ -405,7 +387,6 @@ function DelegationDataPage() {
     debouncedSearchTerm,
     startDate,
     endDate,
-    endDate,
   ]);
 
   const handlePageChange = useCallback((page) => {
@@ -501,11 +482,6 @@ function DelegationDataPage() {
         setStatusData((prevStatus) => ({ ...prevStatus, [id]: "Done" }));
       } else {
         newSelected.delete(id);
-        setAdditionalData((prevData) => {
-          const newAdditionalData = { ...prevData };
-          delete newAdditionalData[id];
-          return newAdditionalData;
-        });
         setRemarksData((prevRemarks) => {
           const newRemarksData = { ...prevRemarks };
           delete newRemarksData[id];
@@ -562,11 +538,6 @@ function DelegationDataPage() {
           selectableIds.forEach(id => {
             next.delete(id);
             // Optionally clear associated data for these specific IDs
-            setAdditionalData((prevData) => {
-              const nextData = { ...prevData };
-              delete nextData[id];
-              return nextData;
-            });
             setRemarksData((prevRemarks) => {
               const nextRemarks = { ...prevRemarks };
               delete nextRemarks[id];
@@ -613,15 +584,6 @@ function DelegationDataPage() {
 
   const handleNextTargetDateChange = useCallback((id, value) => {
     setNextTargetDate((prev) => ({ ...prev, [id]: value }));
-  }, []);
-
-  const fileToBase64 = useCallback((file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
   }, []);
 
   const toggleHistory = useCallback(() => {
@@ -774,7 +736,6 @@ function DelegationDataPage() {
         } else {
           showToast(`Successfully submitted ${selectedItemsArray.length} task records!`, "success");
           setSelectedItems(new Set());
-          setAdditionalData({});
           setRemarksData({});
           setStatusData({});
           setNextTargetDate({});
@@ -825,34 +786,7 @@ function DelegationDataPage() {
     }
   };
 
-  const handleSendUrgentWhatsApp = async () => {
-    if (selectedItems.size === 0) return;
 
-    setIsSubmitting(true);
-    try {
-      const selectedTasks = delegation.filter(t => selectedItems.has(t.id));
-
-      for (const task of selectedTasks) {
-        await sendUrgentTaskNotification({
-          doerName: task.name,
-          taskId: task.id,
-          description: task.task_description,
-          dueDate: formatDateTimeForDisplay(task.planned_date || task.task_start_date),
-          givenBy: task.given_by || username,
-          taskType: 'delegation',
-          department: task.department
-        });
-      }
-
-      showToast(`Urgent WhatsApp notifications sent successfully!`, "success");
-      setSelectedItems(new Set());
-    } catch (err) {
-      console.error("WhatsApp error:", err);
-      showToast("Failed to send WhatsApp messages.", "error");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
 
   const selectedItemsCount = selectedItems.size;

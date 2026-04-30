@@ -22,16 +22,6 @@ const formatDateISO = (date) => {
     return `${year}-${month}-${day}`;
 };
 
-// --- AUDIO UTILITIES ---
-const isAudioUrl = (url) => {
-    if (!url || typeof url !== 'string') return false;
-    return url.startsWith('http') && (
-        url.includes('all_images') ||
-        url.includes('voice-notes') ||
-        url.match(/\.(mp3|wav|ogg|webm|m4a|aac)(\?.*)?$/i)
-    );
-};
-
 const defaultTask = () => ({
     id: Date.now() + Math.random(),
     machineName: "",
@@ -322,7 +312,7 @@ const MaintenanceTaskCard = ({
 
                     {/* Doer's Department */}
                     <div>
-                        <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Doer's Department</label>
+                        <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Doer&apos;s Department</label>
                         <select
                             name="doerDepartment"
                             value={task.doerDepartment}
@@ -340,7 +330,7 @@ const MaintenanceTaskCard = ({
                     {/* Doer Name & Sound Test */}
                     <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Doer's Name <span className="text-red-500">*</span></label>
+                            <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Doer&apos;s Name <span className="text-red-500">*</span></label>
                             <select name="doerName" value={task.doerName} onChange={handleChange} className="w-full p-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none bg-gray-50 focus:bg-white transition-all text-sm">
                                 <option value="">Select Doer</option>
                                 {getFilteredDoers().map((d, i) => { const val = typeof d === 'object' ? (d.user_name || d.name) : d; return <option key={i} value={val}>{val}</option>; })}

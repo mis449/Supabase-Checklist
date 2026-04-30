@@ -102,10 +102,8 @@ const maintenanceSlice = createSlice({
         });
 
         // Update
-        builder.addCase(updateMaintenance.fulfilled, (state, action) => {
-            // We can filter out updated items from 'all_images' state locally to update UI immediately
-            // or rely on reload. 
-            // Let's rely on reload or refetch as per existing patterns.
+        builder.addCase(updateMaintenance.fulfilled, () => {
+            // Updated items are handled by refetching
         });
 
         // Delete
