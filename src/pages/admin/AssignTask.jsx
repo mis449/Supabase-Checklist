@@ -44,7 +44,6 @@ const defaultDelegationTask = () => ({
   description: "",
   startDate: "",
   startTime: "09:00",
-  duration: "",
 });
 
 const defaultChecklistTask = () => ({
@@ -55,7 +54,6 @@ const defaultChecklistTask = () => ({
   description: "",
   startDate: "",
   startTime: "09:00",
-  duration: "",
   frequency: "Daily",
 });
 
@@ -170,10 +168,9 @@ function DelegationForm({ departments, givenByList, doerList, onSubmit, isSubmit
 
       <TextAreaField icon={FileText} label="Description" value={form.description} onChange={set("description")} placeholder="Describe the task..." required />
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <InputField icon={Calendar} label="Start Date" type="date" value={form.startDate} onChange={set("startDate")} required />
         <InputField icon={Clock} label="Start Time" type="time" value={form.startTime} onChange={set("startTime")} required />
-        <InputField icon={Clock} label="Duration (e.g. 1hr)" value={form.duration} onChange={set("duration")} placeholder="e.g. 30 mins" required />
       </div>
 
       <div className="pt-2">
@@ -252,10 +249,9 @@ function ChecklistTaskRow({ task, index, total, departments, givenByList, doerLi
 
         <TextAreaField icon={FileText} label="Description" value={task.description} onChange={set("description")} placeholder="Describe the task..." required />
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <InputField icon={Calendar} label="Start Date" type="date" value={task.startDate} onChange={set("startDate")} required />
           <InputField icon={Clock} label="Start Time" type="time" value={task.startTime} onChange={set("startTime")} required />
-          <InputField icon={Clock} label="Duration" value={task.duration} onChange={set("duration")} placeholder="e.g. 30 mins" required />
         </div>
       </div>
     </div>
@@ -343,7 +339,7 @@ export default function AssignTask() {
       const allTasksToSubmit = [];
 
       for (const task of formTasks) {
-        if (!task.department || !task.doer || !task.description || !task.startDate || !task.duration) {
+        if (!task.department || !task.doer || !task.description || !task.startDate) {
           showToast("Please fill all required fields.", "error");
           setIsSubmitting(false);
           return;
@@ -373,7 +369,6 @@ export default function AssignTask() {
           description: task.description,
           task_description: task.description,
           frequency: freqKey,
-          duration: task.duration,
           dueDate,
           enableReminders: true,
           requireAttachment: false,

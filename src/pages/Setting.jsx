@@ -1417,7 +1417,7 @@ const Setting = () => {
                           Phone No.
                         </th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Employee ID
+                          Status
                         </th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           User ID
@@ -1471,8 +1471,10 @@ const Setting = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">{user?.number}</div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {user?.employee_id || user?.Employee_id || user?.employeeId || 'N/A'}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(user?.status)}`}>
+                              {user?.status || 'active'}
+                            </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900 font-mono bg-gray-50 px-2 py-1 rounded border border-gray-100 w-fit">
@@ -1548,10 +1550,10 @@ const Setting = () => {
                         <div className="p-4 space-y-3">
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
-                              <p className="text-[10px] text-gray-400 uppercase font-semibold">Emp ID</p>
-                              <p className="text-xs text-gray-700 font-medium truncate">
-                                {user?.employee_id || user?.Employee_id || user?.employeeId || 'N/A'}
-                              </p>
+                              <p className="text-[10px] text-gray-400 uppercase font-semibold">Status</p>
+                              <span className={`px-1.5 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded-full uppercase ${getStatusColor(user?.status)}`}>
+                                {user?.status || 'active'}
+                              </span>
                             </div>
                             <div className="space-y-1">
                               <p className="text-[10px] text-gray-400 uppercase font-semibold">User ID</p>
