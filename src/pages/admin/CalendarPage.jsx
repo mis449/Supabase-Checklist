@@ -269,23 +269,7 @@ const CalendarPage = () => {
                     name: t.name || t.assigned_person // Fallback for name field
                 })),
 
-                ...(maintenanceRes.data || []).map(t => ({
-                    ...t,
-                    cat: 'MT',
-                    title: t.task_description || t.id,
-                    date: normalizeDate(t.planned_date || t.task_start_date || t.created_at),
-                    type: 'maintenance',
-                    name: t.name || t.assigned_person
-                })),
 
-                ...(repairRes.data || []).map(t => ({
-                    ...t,
-                    cat: 'RP',
-                    title: t.issue_description || t.task_description || t.id,
-                    date: normalizeDate(t.planned_date || t.task_start_date || t.created_at),
-                    type: 'repair',
-                    name: t.assigned_person || t.name || t.filled_by
-                })),
 
                 ...(delegationRes.data || []).map(t => ({
                     ...t,
@@ -295,16 +279,6 @@ const CalendarPage = () => {
                     date: normalizeDate(t.planned_date || t.task_start_date || t.created_at),
                     type: 'delegation',
                     name: t.name || t.assigned_person
-                })),
-
-                ...(eaRes.data || []).map(t => ({
-                    ...t,
-                    id: t.task_id || t.id,
-                    cat: 'EA',
-                    title: t.task_description || t.id,
-                    date: normalizeDate(t.planned_date || t.task_start_date || t.created_at),
-                    type: 'ea',
-                    name: t.doer_name || t.name
                 }))
             ].filter(t => {
                 if (!t.date) return false;
@@ -572,10 +546,7 @@ const CalendarPage = () => {
                 <div className="flex flex-wrap items-center justify-center gap-4 py-4 md:justify-start">
                     {[
                         { label: 'Checklist', color: 'bg-blue-600' },
-                        { label: 'Maintenance', color: 'bg-orange-600' },
-                        { label: 'Repair', color: 'bg-red-600' },
                         { label: 'Delegation', color: 'bg-purple-600' },
-                        { label: 'EA', color: 'bg-indigo-600' },
                         { label: 'Holiday', color: 'bg-red-400' }
                     ].map(item => (
                         <div key={item.label} className="flex items-center gap-1.5 grayscale-[0.2] hover:grayscale-0 transition-all">
@@ -909,19 +880,7 @@ const CalendarPage = () => {
                                 <ChevronRight className="ml-auto opacity-20 group-hover:opacity-100 transition-all font-black" size={16} />
                             </button>
 
-                            <button
-                                onClick={() => handleAssignTask('ea')}
-                                className="w-full bg-gray-50 hover:bg-purple-600 text-gray-900 hover:text-white p-5 rounded-3xl flex items-center gap-4 transition-all group border border-gray-100 hover:border-purple-600"
-                            >
-                                <div className="p-3 bg-white text-purple-600 rounded-2xl shadow-sm group-hover:bg-purple-500 group-hover:text-white transition-all">
-                                    <Users size={20} />
-                                </div>
-                                <div className="text-left">
-                                    <h4 className="text-sm font-black uppercase leading-tight mb-0.5">EA Task Assignment</h4>
-                                    <p className="text-[9px] font-bold opacity-60 uppercase tracking-wider">Executive assistance</p>
-                                </div>
-                                <ChevronRight className="ml-auto opacity-20 group-hover:opacity-100 transition-all font-black" size={16} />
-                            </button>
+
 
                             <button 
                                 onClick={() => setShowAssignTaskTypePopup(false)}
