@@ -1887,19 +1887,7 @@ const Setting = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <label htmlFor="employee_id" className="block text-sm font-bold text-gray-700 ml-1">Employee ID</label>
-                      <input
-                        type="text"
-                        name="employee_id"
-                        id="employee_id"
-                        value={userForm.employee_id}
-                        onChange={handleUserInputChange}
-                        className={`w-full px-4 py-3 border border-gray-200 rounded-xl outline-none transition-all ${isEditing ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-gray-50 focus:ring-2 focus:ring-purple-500 focus:border-transparent'}`}
-                        readOnly={isEditing}
-                        placeholder="EMP-XXXXXX"
-                      />
-                    </div>
+
 
                     <div className="space-y-2">
                       <label htmlFor="role" className="block text-sm font-bold text-gray-700 ml-1">User Role</label>
