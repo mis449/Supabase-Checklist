@@ -87,24 +87,7 @@ export const fetchDepartmentDataApi = async () => {
 };
 export const createUserApi = async (newUser) => {
   try {
-    // Step 1: Get the current highest ID
-    const { data: maxIdData, error: maxIdError } = await supabase
-      .from("users")
-      .select("id")
-      .order("id", { ascending: false })
-      .limit(1);
-
-    if (maxIdError) {
-      console.error("Error fetching last ID:", maxIdError);
-      return;
-    }
-
-    const lastId = maxIdData?.[0]?.id || 0;
-    const newId = lastId + 1;
-
-    // Step 2: Insert user with new ID
     const insertData = {
-      id: newId,
       user_name: newUser.username,
       password: newUser.password,
       email_id: newUser.email,
@@ -143,14 +126,15 @@ export const createUserApi = async (newUser) => {
     }
 
     if (error) {
-      console.log("Error when posting data:", error);
-    } else {
-      console.log("Posted successfully", data);
+      console.error("❌ Error when posting data:", error);
+      throw error; // Throw so Redux action rejects
     }
 
+    console.log("✅ Posted successfully", data);
     return data;
   } catch (error) {
-    console.log("Error from Supabase:", error);
+    console.error("❌ Exception in createUserApi:", error);
+    throw error;
   }
 };
 
