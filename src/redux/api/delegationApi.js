@@ -175,10 +175,22 @@ export const fetchDelegationDataSortByDate = async () => {
 
 export const fetchDelegation_DoneDataSortByDate = async () => {
   try {
-    const { data, error } = await supabase
+    const role = localStorage.getItem('role');
+    const username = localStorage.getItem('user-name');
+
+    let query = supabase
       .from('delegation_done')
       .select('*')
       .order('created_at', { ascending: false });
+
+    // Apply filtering for non-admin users
+    if (role !== 'admin' && username) {
+      // Filter where the task was assigned to the user
+      // Note: submittedBy is conceptually the same as name in this system's current submission flow
+      query = query.eq('name', username);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 

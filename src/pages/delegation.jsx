@@ -338,6 +338,14 @@ function DelegationDataPage() {
 
     return delegation_done
       .filter((item) => {
+        // User Role filtering: Admins see all, others see only their own tasks
+        const assignedUser = item.name || item.assigned_person || "";
+        const isAuthorized =
+          (userRole || "").toLowerCase() === "admin" ||
+          (assignedUser && assignedUser.toLowerCase() === (username || "").toLowerCase());
+
+        if (!isAuthorized) return false;
+
         const matchesSearch = debouncedSearchTerm
           ? Object.values(item).some(
             (value) =>
@@ -387,6 +395,8 @@ function DelegationDataPage() {
     debouncedSearchTerm,
     startDate,
     endDate,
+    userRole,
+    username,
   ]);
 
   const handlePageChange = useCallback((page) => {
