@@ -779,7 +779,7 @@ export default function AdminLayout({ children, darkMode, toggleDarkMode, showLa
               }`}
           >
             <BookmarkCheck size={22} strokeWidth={location.pathname === "/dashboard/delegation" ? 2.5 : 2} />
-            <span className="text-[10px] mt-1 font-bold">Status</span>
+            <span className="text-[10px] mt-1 font-bold">Delegation</span>
           </Link>
 
           <button

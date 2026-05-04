@@ -44,7 +44,7 @@ export default function StatisticsCards({
           {/* Total Tasks - Standardized size for mobile */}
           <div className="rounded-xl border border-l-4 border-l-blue-500 shadow-md hover:shadow-lg transition-all bg-white overflow-hidden flex flex-col">
             <div className="flex flex-row items-center justify-between space-y-0 bg-gradient-to-r from-blue-50 to-blue-100 p-3">
-              <h3 className="text-[10px] xs:text-xs font-bold text-blue-700 uppercase tracking-wider line-clamp-1">Analyzed</h3>
+              <h3 className="text-[10px] xs:text-xs font-bold text-blue-700 uppercase tracking-wider line-clamp-1">Total Task</h3>
               <ListTodo className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
             </div>
             <div className="p-3 flex-1 flex flex-col justify-center">
@@ -58,7 +58,7 @@ export default function StatisticsCards({
           {/* Completed Tasks */}
           <div className="rounded-xl border border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-all bg-white overflow-hidden flex flex-col">
             <div className="flex flex-row items-center justify-between space-y-0 bg-gradient-to-r from-green-50 to-green-100 p-3">
-              <h3 className="text-[10px] xs:text-xs font-bold text-green-700 uppercase tracking-wider line-clamp-1">Done</h3>
+              <h3 className="text-[10px] xs:text-xs font-bold text-green-700 uppercase tracking-wider line-clamp-1">Completed Task</h3>
               <CheckCircle2 className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
             </div>
             <div className="p-3 flex-1 flex flex-col justify-center">
@@ -72,7 +72,7 @@ export default function StatisticsCards({
           {/* Pending Tasks */}
           <div className="rounded-xl border border-l-4 border-l-amber-500 shadow-md hover:shadow-lg transition-all bg-white overflow-hidden flex flex-col">
             <div className="flex flex-row items-center justify-between space-y-0 bg-gradient-to-r from-amber-50 to-amber-100 p-3">
-              <h3 className="text-[10px] xs:text-xs font-bold text-amber-700 uppercase tracking-wider line-clamp-1">Due Today</h3>
+              <h3 className="text-[10px] xs:text-xs font-bold text-amber-700 uppercase tracking-wider line-clamp-1">Today Task</h3>
               <Clock className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
             </div>
             <div className="p-3 flex-1 flex flex-col justify-center">
@@ -86,7 +86,7 @@ export default function StatisticsCards({
           {/* Overdue Tasks */}
           <div className="rounded-xl border border-l-4 border-l-red-500 shadow-md hover:shadow-lg transition-all bg-white overflow-hidden flex flex-col">
             <div className="flex flex-row items-center justify-between space-y-0 bg-gradient-to-r from-red-50 to-red-100 p-3">
-              <h3 className="text-[10px] xs:text-xs font-bold text-red-700 uppercase tracking-wider line-clamp-1">Overdue</h3>
+              <h3 className="text-[10px] xs:text-xs font-bold text-red-700 uppercase tracking-wider line-clamp-1">Overdue Task</h3>
               <AlertTriangle className="h-3.5 w-3.5 text-red-500 flex-shrink-0" />
             </div>
             <div className="p-3 flex-1 flex flex-col justify-center">
