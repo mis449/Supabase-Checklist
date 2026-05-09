@@ -25,6 +25,7 @@ import {
   CrossIcon,
   X,
   Bell,
+  IndianRupee,
 } from "lucide-react";
 
 export default function AdminLayout({ children, darkMode, toggleDarkMode, showLayout = true }) {
@@ -71,7 +72,8 @@ export default function AdminLayout({ children, darkMode, toggleDarkMode, showLa
       "/dashboard/ea-task",
       "/dashboard/quick-task",
       "/dashboard/holiday-list",
-      "/dashboard/working-day-calendar"
+      "/dashboard/working-day-calendar",
+      "/dashboard/salary"
     ];
 
     const storedRoleLower = (storedRole || "user").toLowerCase();
@@ -90,7 +92,8 @@ export default function AdminLayout({ children, darkMode, toggleDarkMode, showLa
         "/dashboard/ea-task",
         "/dashboard/quick-task",
         "/dashboard/holiday-list",
-        "/dashboard/working-day-calendar"
+        "/dashboard/working-day-calendar",
+        "/dashboard/salary"
       ];
 
       if (!isMachineOperator) {
@@ -256,14 +259,13 @@ export default function AdminLayout({ children, darkMode, toggleDarkMode, showLa
       active: location.pathname === "/dashboard/admin-approval",
       showFor: ["admin", "HOD"],
     },
-    // {
-    //   href: "/dashboard/mis-report",
-    //   label: "MIS Report",
-    //   icon: CheckSquare,
-    //   active: location.pathname.includes("/dashboard/mis-report"),
-    //   // Only show for super admin (username = 'admin')
-    //   showFor: isSuperAdmin ? ["admin"] : [],
-    // },
+    {
+      href: "/dashboard/salary",
+      label: "Salary Management",
+      icon: IndianRupee,
+      active: location.pathname === "/dashboard/salary",
+      showFor: ["admin"],
+    },
     {
       href: "/dashboard/setting",
       label: "Settings",
