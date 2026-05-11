@@ -1899,29 +1899,11 @@ const Setting = () => {
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
                       >
                         <option value="admin">Admin</option>
-                        <option value="HOD">HOD</option>
                         <option value="user">User</option>
                       </select>
                     </div>
 
-                    <div className="space-y-2">
-                      <label htmlFor="reported_by" className="block text-sm font-bold text-gray-700 ml-1">Reported To (Supervisor)</label>
-                      <select
-                        id="reported_by"
-                        name="reported_by"
-                        value={userForm.reported_by}
-                        onChange={handleUserInputChange}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                      >
-                        <option value="">No Supervisor (Direct Admin)</option>
-                        {userData && userData.length > 0 && userData
-                          .filter(u => u && u.user_name !== userForm.username && u.user_name !== 'admin')
-                          .map((u, i) => (
-                            <option key={i} value={u.user_name}>{u.user_name}</option>
-                          ))
-                        }
-                      </select>
-                    </div>
+
 
                     <div className="space-y-2 md:col-span-2">
                       <label htmlFor="department" className="block text-sm font-bold text-gray-700 ml-1">Department Assigned</label>
@@ -1943,19 +1925,7 @@ const Setting = () => {
                       </select>
                     </div>
 
-                    {/* Designation Field — shown for both new and edit */}
-                    <div className="space-y-2">
-                      <label htmlFor="Designation" className="block text-sm font-bold text-gray-700 ml-1">Designation</label>
-                      <input
-                        type="text"
-                        name="Designation"
-                        id="Designation"
-                        value={userForm.Designation}
-                        onChange={handleUserInputChange}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                        placeholder="e.g. Senior Technician, Supervisor..."
-                      />
-                    </div>
+
 
                     {isEditing && (
                       <>
@@ -2019,27 +1989,7 @@ const Setting = () => {
 
                   </div>
                   
-                  <div className="mt-8 bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-[2rem] border border-purple-100/50 flex items-center justify-between group transition-all hover:shadow-xl hover:shadow-purple-100/30">
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center text-purple-600 shadow-sm border border-purple-100 group-hover:scale-110 transition-transform">
-                        <User size={20} strokeWidth={2.5} />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-black text-purple-900 uppercase tracking-widest mb-0.5 group-hover:text-indigo-600 transition-colors">Self-Assign Rights</h4>
-                        <p className="text-[10px] text-gray-400 font-bold max-w-[200px]">Allow this user to assign tasks to themselves</p>
-                      </div>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer scale-110">
-                      <input 
-                        type="checkbox" 
-                        name="can_self_assign"
-                        checked={userForm.can_self_assign}
-                        onChange={(e) => setUserForm(prev => ({ ...prev, can_self_assign: e.target.checked }))}
-                        className="sr-only peer" 
-                      />
-                      <div className="w-12 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-600 peer-checked:to-indigo-600"></div>
-                    </label>
-                  </div>
+
 
                   <div className="flex justify-end gap-3 pt-6 border-t border-gray-50 mt-4">
                     <button

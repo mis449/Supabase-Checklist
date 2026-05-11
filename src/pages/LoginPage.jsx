@@ -9,7 +9,7 @@ import { LoginCredentialsApi } from "../redux/api/loginApi"
 import { useMagicToast } from "../context/MagicToastContext"
 import supabase from "../SupabaseClient"
 import { sendPasswordResetOTP } from "../services/whatsappService"
-import { KeyRound, ShieldCheck, User as UserIcon, ArrowLeft, RefreshCw, Smartphone } from "lucide-react"
+import { KeyRound, ShieldCheck, User as UserIcon, ArrowLeft, RefreshCw, Smartphone, Eye, EyeOff } from "lucide-react"
 
 const LoginPage = () => {
   const navigate = useNavigate()
@@ -18,6 +18,7 @@ const LoginPage = () => {
   const { showToast } = useMagicToast();
 
   const [isLoginLoading, setIsLoginLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -34,6 +35,7 @@ const LoginPage = () => {
     generatedOtp: ""
   })
   const [isForgotLoading, setIsForgotLoading] = useState(false)
+  const [showForgotPasswords, setShowForgotPasswords] = useState(false)
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -130,16 +132,25 @@ const LoginPage = () => {
               <i className="fas fa-key h-4 w-4 mr-2"></i>
               Password
             </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Enter your password"
-              required
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full pl-3 pr-10 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-400 hover:text-blue-600 transition-colors"
+              >
+                {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+              </button>
+            </div>
           </div>
 
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 -mx-4 -mb-4 mt-4 rounded-b-lg flex flex-col gap-3">
@@ -275,25 +286,39 @@ const LoginPage = () => {
                   }} className="space-y-4">
                     <div className="relative">
                       <input
-                        type="password"
+                        type={showForgotPasswords ? "text" : "password"}
                         placeholder="New Password"
                         required
                         value={forgotData.newPassword}
                         onChange={(e) => setForgotData({ ...forgotData, newPassword: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all"
+                        className="w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all"
                       />
                       <KeyRound className="absolute left-3 top-3.5 text-gray-400" size={18} />
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPasswords(!showForgotPasswords)}
+                        className="absolute right-3 top-3.5 text-gray-400 hover:text-blue-600 transition-colors"
+                      >
+                        {showForgotPasswords ? <Eye size={18} /> : <EyeOff size={18} />}
+                      </button>
                     </div>
                     <div className="relative">
                       <input
-                        type="password"
+                        type={showForgotPasswords ? "text" : "password"}
                         placeholder="Confirm New Password"
                         required
                         value={forgotData.confirmPassword}
                         onChange={(e) => setForgotData({ ...forgotData, confirmPassword: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all"
+                        className="w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all"
                       />
                       <ShieldCheck className="absolute left-3 top-3.5 text-gray-400" size={18} />
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPasswords(!showForgotPasswords)}
+                        className="absolute right-3 top-3.5 text-gray-400 hover:text-blue-600 transition-colors"
+                      >
+                        {showForgotPasswords ? <Eye size={18} /> : <EyeOff size={18} />}
+                      </button>
                     </div>
                     <button
                       type="submit"

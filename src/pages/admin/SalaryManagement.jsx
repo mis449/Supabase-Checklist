@@ -337,8 +337,8 @@ export default function SalaryManagement() {
                     <style>
                         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #333; }
                         .slip-container { border: 2px solid #eee; padding: 30px; border-radius: 20px; max-width: 800px; margin: auto; }
-                        .header { text-align: center; border-bottom: 2px solid #6366f1; padding-bottom: 20px; margin-bottom: 30px; }
-                        .company-name { font-size: 24px; font-weight: 900; color: #4f46e5; text-transform: uppercase; margin: 0; }
+                        .header { text-align: center; border-bottom: 2px solid #a855f7; padding-bottom: 20px; margin-bottom: 30px; }
+                        .company-name { font-size: 24px; font-weight: 900; color: #9333ea; text-transform: uppercase; margin: 0; }
                         .subtitle { font-size: 14px; color: #666; margin-top: 5px; }
                         .slip-title { font-size: 18px; font-weight: bold; background: #f8fafc; display: inline-block; padding: 8px 20px; border-radius: 10px; margin-top: 15px; }
                         .details-grid { display: grid; grid-template-cols: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
@@ -350,7 +350,7 @@ export default function SalaryManagement() {
                         .table td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 14px; font-weight: 600; }
                         .footer { margin-top: 50px; display: flex; justify-content: space-between; align-items: flex-end; }
                         .signature { border-top: 1px solid #ddd; width: 200px; text-align: center; padding-top: 10px; font-size: 12px; color: #666; }
-                        .total-section { background: #4f46e5; color: white; padding: 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; }
+                        .total-section { background: #9333ea; color: white; padding: 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; }
                         .total-label { font-size: 16px; font-weight: bold; }
                         .total-value { font-size: 24px; font-weight: 900; }
                         @media print { .no-print { display: none; } }
@@ -493,8 +493,8 @@ export default function SalaryManagement() {
         element.style.fontFamily = "Arial, sans-serif";
         element.innerHTML = `
             <div style="border: 2px solid #eee; padding: 30px; border-radius: 20px; max-width: 800px; margin: auto;">
-                <div style="text-align: center; border-bottom: 2px solid #6366f1; padding-bottom: 20px; margin-bottom: 30px;">
-                    <h1 style="font-size: 24px; font-weight: 900; color: #4f46e5; text-transform: uppercase; margin: 0;">PAREKH CHECKLIST & DELEGATION</h1>
+                <div style="text-align: center; border-bottom: 2px solid #a855f7; padding-bottom: 20px; margin-bottom: 30px;">
+                    <h1 style="font-size: 24px; font-weight: 900; color: #9333ea; text-transform: uppercase; margin: 0;">PAREKH CHECKLIST & DELEGATION</h1>
                     <p style="font-size: 14px; color: #666; margin-top: 5px;">Employee Monthly Salary Statement</p>
                     <div style="font-size: 18px; font-weight: bold; background: #f8fafc; display: inline-block; padding: 8px 20px; border-radius: 10px; margin-top: 15px;">Salary Slip for ${monthName.toUpperCase()}</div>
                 </div>
@@ -533,7 +533,7 @@ export default function SalaryManagement() {
                     </tbody>
                 </table>
 
-                <div style="background: #4f46e5; color: white; padding: 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="background: #9333ea; color: white; padding: 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center;">
                     <div style="font-size: 16px; font-weight: bold;">Net Payable Salary</div>
                     <div style="font-size: 24px; font-weight: 900;">₹${item.round_off}</div>
                 </div>
@@ -580,7 +580,7 @@ export default function SalaryManagement() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+                                <div className="w-12 h-12 rounded-2xl bg-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-200">
                                     <IndianRupee size={24} />
                                 </div>
                                 <div>
@@ -594,7 +594,7 @@ export default function SalaryManagement() {
                                     setNewEmp({ name: "", basic_salary: 0 });
                                     setIsEmployeeModalOpen(true);
                                 }}
-                                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+                                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl font-bold text-sm hover:bg-purple-700 transition-all shadow-lg shadow-purple-100"
                             >
                                 <Plus size={18} />
                                 Manage Employees
@@ -602,8 +602,8 @@ export default function SalaryManagement() {
                         </div>
                     
                     <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
-                        <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 text-indigo-700 rounded-xl">
-                            <Calendar size={18} className="text-indigo-500" />
+                        <div className="flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-700 rounded-xl">
+                            <Calendar size={18} className="text-purple-500" />
                             <input 
                                 type="month" 
                                 value={salaryMonth}
@@ -623,9 +623,9 @@ export default function SalaryManagement() {
                 {/* Vertical Form Entry Section */}
                 <div className="space-y-6 mb-8">
                     {rows.map((row, index) => (
-                        <div key={index} className="bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-indigo-100/20 overflow-hidden transition-all hover:shadow-indigo-200/30">
+                        <div key={index} className="bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-purple-100/20 overflow-hidden transition-all hover:shadow-purple-200/30">
                             {/* Card Header */}
-                            <div className="bg-indigo-600 px-6 py-3 flex items-center justify-between">
+                            <div className="bg-purple-600 px-6 py-3 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-black text-sm">
                                         {row.sr_no}
@@ -653,7 +653,7 @@ export default function SalaryManagement() {
                                             <select 
                                                 value={row.employee_name}
                                                 onChange={(e) => handleEmployeeChange(index, e.target.value)}
-                                                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-indigo-500 outline-none transition-all appearance-none"
+                                                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all appearance-none"
                                             >
                                                 <option value="">Select Employee</option>
                                                 {employees.map(emp => (
@@ -672,46 +672,49 @@ export default function SalaryManagement() {
                                                 type="number" 
                                                 value={row.basic_salary || ""} 
                                                 onChange={(e) => handleInputChange(index, "basic_salary", e.target.value)}
-                                                className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-black text-indigo-600 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                                                className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-black text-purple-600 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                                 placeholder="0"
                                             />
                                         </div>
                                     </div>
 
-                                    {/* Numeric Fields Grid */}
+                                    {/* Total Days */}
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Total Days</label>
                                         <input 
                                             type="number" 
                                             value={row.total_days} 
                                             onChange={(e) => handleInputChange(index, "total_days", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                             placeholder="0"
                                         />
                                     </div>
 
+                                    {/* Working Days */}
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Working Days</label>
                                         <input 
                                             type="number" 
                                             value={row.working_days || ""} 
                                             onChange={(e) => handleInputChange(index, "working_days", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                             placeholder="0"
                                         />
                                     </div>
 
+                                    {/* Bonus */}
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Bonus</label>
                                         <input 
                                             type="number" 
                                             value={row.extra_days || ""} 
                                             onChange={(e) => handleInputChange(index, "extra_days", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                             placeholder="0"
                                         />
                                     </div>
 
+                                    {/* Advance */}
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Advance</label>
                                         <div className="relative">
@@ -726,50 +729,55 @@ export default function SalaryManagement() {
                                         </div>
                                     </div>
 
+                                    {/* Absent */}
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Absent</label>
                                         <input 
                                             type="number" 
                                             value={row.absent || ""} 
                                             onChange={(e) => handleInputChange(index, "absent", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                             placeholder="0"
                                         />
                                     </div>
 
+                                    {/* Half Day */}
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Half Day</label>
                                         <input 
                                             type="number" 
                                             value={row.half_day || ""} 
                                             onChange={(e) => handleInputChange(index, "half_day", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                             placeholder="0"
                                         />
                                     </div>
 
+                                    {/* Bio Mismatch */}
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Bio Mismatch</label>
                                         <input 
                                             type="number" 
                                             value={row.biometric_mismatch || ""} 
                                             onChange={(e) => handleInputChange(index, "biometric_mismatch", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                             placeholder="0"
                                         />
                                     </div>
 
+                                    {/* Late Comers */}
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Late Comers</label>
                                         <input 
                                             type="number" 
                                             value={row.late_comers || ""} 
                                             onChange={(e) => handleInputChange(index, "late_comers", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                             placeholder="0"
                                         />
                                     </div>
 
+                                    {/* Final Amount */}
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Final Amount</label>
                                         <div className="relative">
@@ -778,30 +786,32 @@ export default function SalaryManagement() {
                                                 type="number" 
                                                 value={row.final_amt || ""} 
                                                 onChange={(e) => handleInputChange(index, "final_amt", e.target.value)}
-                                                className="w-full pl-8 pr-4 py-2.5 bg-indigo-50 border border-indigo-200 rounded-2xl text-sm font-black text-indigo-700 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                                                className="w-full pl-8 pr-4 py-2.5 bg-purple-50 border border-purple-200 rounded-2xl text-sm font-black text-purple-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                                 placeholder="0"
                                             />
                                         </div>
                                     </div>
 
+                                    {/* Round Off */}
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Round Off</label>
                                         <input 
                                             type="number" 
                                             value={row.round_off || ""} 
                                             onChange={(e) => handleInputChange(index, "round_off", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                             placeholder="0"
                                         />
                                     </div>
 
+                                    {/* Remarks */}
                                     <div className="lg:col-span-2 xl:col-span-1">
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Remarks</label>
                                         <input 
                                             type="text" 
                                             value={row.remarks || ""} 
                                             onChange={(e) => handleInputChange(index, "remarks", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-medium text-gray-600 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-medium text-gray-600 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                             placeholder="Any notes..."
                                         />
                                     </div>
@@ -815,7 +825,7 @@ export default function SalaryManagement() {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <button 
                         onClick={addRow}
-                        className="flex items-center gap-2 px-6 py-3 bg-white text-indigo-600 font-bold rounded-2xl border-2 border-indigo-100 hover:border-indigo-300 hover:bg-indigo-50 transition-all shadow-sm"
+                        className="flex items-center gap-2 px-6 py-3 bg-white text-purple-600 font-bold rounded-2xl border-2 border-purple-100 hover:border-purple-300 hover:bg-purple-50 transition-all shadow-sm"
                     >
                         <Plus size={20} />
                         Add New Row
@@ -825,7 +835,7 @@ export default function SalaryManagement() {
                         <button 
                             onClick={handleSubmit}
                             disabled={isSubmitting}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl shadow-xl shadow-indigo-200 transform transition-all active:scale-95 disabled:opacity-70"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl shadow-purple-200 transform transition-all active:scale-95 disabled:opacity-70"
                         >
                             {isSubmitting ? (
                                 <><Loader2 size={20} className="animate-spin" /> Saving...</>
@@ -891,7 +901,7 @@ export default function SalaryManagement() {
                                                 <td className="py-2.5 px-4 text-sm font-bold text-gray-700">{item.employee_name}</td>
                                                 <td className="py-2.5 px-4 text-sm font-bold text-gray-400">{item.total_days}</td>
                                                 <td className="py-2.5 px-4 text-sm font-bold text-gray-600">{item.working_days}</td>
-                                                <td className="py-2.5 px-4 text-sm font-black text-indigo-600">₹{item.basic_salary}</td>
+                                                <td className="py-2.5 px-4 text-sm font-black text-purple-600">₹{item.basic_salary}</td>
                                                 <td className="py-2.5 px-4 text-sm font-bold text-gray-600">{item.extra_days} days</td>
                                                 <td className="py-2.5 px-4 text-sm font-bold text-red-500">₹{item.advance}</td>
                                                 <td className="py-2.5 px-4 text-sm font-bold text-red-500">{item.absent} days</td>
@@ -907,7 +917,7 @@ export default function SalaryManagement() {
                                                     <div className="flex items-center justify-center gap-2">
                                                         <button 
                                                             onClick={() => downloadSalarySlip(item)}
-                                                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                                                            className="p-2 text-purple-600 hover:bg-purple-50 rounded-xl transition-all"
                                                             title="View Slip"
                                                         >
                                                             <FileText size={16} />
@@ -953,7 +963,7 @@ export default function SalaryManagement() {
                                     <div key={item.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm space-y-4">
                                         <div className="flex justify-between items-start">
                                             <div>
-                                                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Employee</span>
+                                                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Employee</span>
                                                 <h4 className="text-base font-black text-gray-800">{item.employee_name}</h4>
                                             </div>
                                             <div className="text-right">
@@ -969,7 +979,7 @@ export default function SalaryManagement() {
                                             </div>
                                             <div>
                                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Basic Salary</span>
-                                                <span className="text-sm font-bold text-indigo-600">₹{item.basic_salary}</span>
+                                                <span className="text-sm font-bold text-purple-600">₹{item.basic_salary}</span>
                                             </div>
                                         </div>
 
@@ -985,7 +995,7 @@ export default function SalaryManagement() {
 
                                         <div className="flex items-center justify-between pt-2">
                                             <div className="flex gap-2">
-                                                <button onClick={() => downloadSalarySlip(item)} className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl flex items-center gap-2 text-xs font-bold transition-all active:scale-95">
+                                                <button onClick={() => downloadSalarySlip(item)} className="p-2.5 bg-purple-50 text-purple-600 rounded-xl flex items-center gap-2 text-xs font-bold transition-all active:scale-95">
                                                     <FileText size={14} /> View
                                                 </button>
                                                 <button onClick={() => downloadSalarySlipAsPDF(item)} className="p-2.5 bg-green-50 text-green-600 rounded-xl flex items-center gap-2 text-xs font-bold transition-all active:scale-95">
@@ -1018,7 +1028,7 @@ export default function SalaryManagement() {
             {isEmployeeModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto">
                     <div className="bg-white rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200 my-8">
-                        <div className="bg-indigo-600 px-6 py-4 flex items-center justify-between">
+                        <div className="bg-purple-600 px-6 py-4 flex items-center justify-between">
                             <h3 className="text-white font-bold tracking-tight">
                                 {newEmp.id ? "Edit Employee" : "Add New Employee"}
                             </h3>
@@ -1043,7 +1053,7 @@ export default function SalaryManagement() {
                                                 required
                                                 value={newEmp.name}
                                                 onChange={(e) => setNewEmp({...newEmp, name: e.target.value})}
-                                                className="w-full pl-10 pr-4 py-2 bg-white border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:border-indigo-500 outline-none transition-all shadow-sm"
+                                                className="w-full pl-10 pr-4 py-2 bg-white border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:border-purple-500 outline-none transition-all shadow-sm"
                                                 placeholder="Employee name"
                                             />
                                         </div>
@@ -1057,7 +1067,7 @@ export default function SalaryManagement() {
                                                 required
                                                 value={newEmp.basic_salary || ""}
                                                 onChange={(e) => setNewEmp({...newEmp, basic_salary: parseFloat(e.target.value) || 0})}
-                                                className="w-full pl-8 pr-4 py-2 bg-white border border-transparent rounded-2xl text-sm font-black text-indigo-600 focus:border-indigo-500 outline-none transition-all shadow-sm"
+                                                className="w-full pl-8 pr-4 py-2 bg-white border border-transparent rounded-2xl text-sm font-black text-purple-600 focus:border-purple-500 outline-none transition-all shadow-sm"
                                                 placeholder="0"
                                             />
                                         </div>
@@ -1067,7 +1077,7 @@ export default function SalaryManagement() {
                                     <button 
                                         type="submit" 
                                         disabled={isSavingEmp}
-                                        className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-indigo-700 disabled:bg-gray-300 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2"
+                                        className="flex-1 py-2.5 bg-purple-600 text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-purple-700 disabled:bg-gray-300 transition-all shadow-lg shadow-purple-100 flex items-center justify-center gap-2"
                                     >
                                         {isSavingEmp ? <Loader2 className="animate-spin" size={14} /> : <Plus size={14} />}
                                         {newEmp.id ? "Update" : "Add Employee"}
@@ -1098,14 +1108,14 @@ export default function SalaryManagement() {
                                         </thead>
                                         <tbody className="divide-y divide-gray-50">
                                             {employees.map(emp => (
-                                                <tr key={emp.id} className="hover:bg-indigo-50/30 transition-colors">
+                                                <tr key={emp.id} className="hover:bg-purple-50/30 transition-colors">
                                                     <td className="p-3 text-sm font-bold text-gray-700">{emp.name}</td>
-                                                    <td className="p-3 text-sm font-black text-indigo-600">₹{emp.basic_salary}</td>
+                                                    <td className="p-3 text-sm font-black text-purple-600">₹{emp.basic_salary}</td>
                                                     <td className="p-3 text-right">
                                                         <div className="flex items-center justify-end gap-2">
                                                             <button 
                                                                 onClick={() => setNewEmp(emp)}
-                                                                className="p-1.5 text-indigo-600 hover:bg-indigo-100 rounded-lg transition-all"
+                                                                className="p-1.5 text-purple-600 hover:bg-purple-100 rounded-lg transition-all"
                                                                 title="Edit"
                                                             >
                                                                 <Save size={14} />
