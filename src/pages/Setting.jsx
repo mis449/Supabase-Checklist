@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, User, Building, X, Save, Edit, Trash2, Search, ChevronDown, Calendar, RefreshCw, Settings } from 'lucide-react';
+import { Plus, User, Building, X, Save, Edit, Trash2, Search, ChevronDown, Calendar, RefreshCw, Settings, Eye, EyeOff } from 'lucide-react';
 import AdminLayout from '../components/layout/AdminLayout';
 import { useDispatch, useSelector } from 'react-redux';
 import { createDepartment, createUser, deleteUser, departmentOnlyDetails, givenByDetails, departmentDetails, updateDepartment, updateUser, userDetails, customDropdownDetails, createCustomDropdown, deleteCustomDropdown, createAssignFrom, deleteDepartment, deleteAssignFrom, updateCustomDropdown, updateAssignFrom, uploadProfileImage, createMachineEntries } from '../redux/slice/settingSlice';
@@ -64,6 +64,7 @@ const Setting = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [profileFile, setProfileFile] = useState(null);
   const [profilePreview, setProfilePreview] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { userData, department, departmentsOnly, givenBy, customDropdowns, loading, error } = useSelector((state) => state.setting);
   const dispatch = useDispatch();
@@ -819,7 +820,7 @@ const Setting = () => {
     setUserForm({
       username: user.user_name || '',
       email: user.email_id || '',
-      password: '', // Leave empty when editing to keep current password
+      password: user.password || '', // Allow editing current password
       phone: user.number || '',
       employee_id: user.employee_id || '',
       department: user.department || '',
@@ -1859,20 +1860,27 @@ const Setting = () => {
                       />
                     </div>
 
-                    {!isEditing && (
-                      <div className="space-y-2">
-                        <label htmlFor="password" className="block text-sm font-bold text-gray-700 ml-1">Password</label>
+                    <div className="space-y-2">
+                      <label htmlFor="password" className="block text-sm font-bold text-gray-700 ml-1">Password</label>
+                      <div className="relative">
                         <input
-                          type="password"
+                          type={showPassword ? "text" : "password"}
                           name="password"
                           id="password"
                           value={userForm.password}
                           onChange={handleUserInputChange}
-                          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all pr-12"
                           placeholder="••••••••"
                         />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 transition-colors p-1"
+                        >
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                       </div>
-                    )}
+                    </div>
 
                     <div className="space-y-2">
                       <label htmlFor="phone" className="block text-sm font-bold text-gray-700 ml-1">Phone Number</label>
