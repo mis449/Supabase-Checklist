@@ -75,17 +75,17 @@ export default function SalaryManagement() {
         fetchSubmittedData();
         // Update all rows with new month defaults
         const totalDays = getDaysInMonth(salaryMonth);
-        const sundays = getSundaysInMonth(salaryMonth);
-        const defaultWorkingDays = totalDays - sundays;
 
         setRows(prevRows => prevRows.map(row => {
             const updatedRow = { 
                 ...row, 
                 total_days: totalDays
             };
+            const finalAmt = calculateRowFinalAmount(updatedRow);
             return {
                 ...updatedRow,
-                final_amt: calculateRowFinalAmount(updatedRow)
+                final_amt: finalAmt,
+                round_off: finalAmt
             };
         }));
     }, [salaryMonth]);
@@ -123,23 +123,17 @@ export default function SalaryManagement() {
 
     const calculateRowFinalAmount = (row) => {
         const basic = parseFloat(row.basic_salary) || 0;
+        const totalDays = parseFloat(row.total_days) || 0;
         const workingDays = parseFloat(row.working_days) || 0;
+        const bioMismatch = parseFloat(row.biometric_mismatch) || 0;
+        const lateComers = parseFloat(row.late_comers) || 0;
         
-        if (workingDays <= 0) return 0;
+        if (totalDays <= 0) return 0;
         
-        const dailyRate = basic / workingDays;
+        const perDaySalary = basic / totalDays;
+        const salaryBasedOnWorkingDays = perDaySalary * workingDays;
         
-        // Additions
-        const extraAmt = (parseFloat(row.extra_days) || 0) * dailyRate;
-        
-        // Deductions
-        const advanceAmt = parseFloat(row.advance) || 0; // Now a deduction
-        const absentAmt = (parseFloat(row.absent) || 0) * dailyRate;
-        const halfDayAmt = (parseFloat(row.half_day) || 0) * (dailyRate / 2);
-        const bioPenalty = (parseFloat(row.biometric_mismatch) || 0) * 100; // ₹100 per mismatch
-        const latePenalty = (parseFloat(row.late_comers) || 0) * 50;    // ₹50 per late entry
-        
-        const total = basic + extraAmt - advanceAmt - absentAmt - halfDayAmt - bioPenalty - latePenalty;
+        const total = salaryBasedOnWorkingDays - bioMismatch - lateComers;
         return Math.round(total);
     };
 
@@ -155,7 +149,9 @@ export default function SalaryManagement() {
             newRows[index].basic_salary = 0;
         }
 
-        newRows[index].final_amt = calculateRowFinalAmount(newRows[index]);
+        const finalAmt = calculateRowFinalAmount(newRows[index]);
+        newRows[index].final_amt = finalAmt;
+        newRows[index].round_off = finalAmt;
         setRows(newRows);
     };
 
@@ -170,13 +166,12 @@ export default function SalaryManagement() {
             newRows[index][field] = value;
         }
 
-        // Removed auto-calculation of Working Days as per user request
-
-
         // Auto-calculate final amount if any contributing field changes
-        const calculationFields = ["basic_salary", "working_days", "extra_days", "advance", "absent", "half_day", "biometric_mismatch", "late_comers", "total_days"];
+        const calculationFields = ["basic_salary", "working_days", "biometric_mismatch", "late_comers", "total_days"];
         if (calculationFields.includes(field)) {
-            newRows[index].final_amt = calculateRowFinalAmount(newRows[index]);
+            const finalAmt = calculateRowFinalAmount(newRows[index]);
+            newRows[index].final_amt = finalAmt;
+            newRows[index].round_off = finalAmt;
         }
 
         setRows(newRows);
@@ -330,6 +325,9 @@ export default function SalaryManagement() {
         const slipWindow = window.open("", "_blank");
         const monthName = formatMonthDisplay(item.salary_month);
         
+        const perDaySalary = item.total_days > 0 ? (item.basic_salary / item.total_days) : 0;
+        const salaryBasedOnWorkingDays = perDaySalary * (item.working_days || 0);
+
         slipWindow.document.write(`
             <html>
                 <head>
@@ -379,7 +377,7 @@ export default function SalaryManagement() {
                             <thead>
                                 <tr>
                                     <th>Description</th>
-                                    <th>Days / Count</th>
+                                    <th>Days / Details</th>
                                     <th>Amount / Calculation</th>
                                 </tr>
                             </thead>
@@ -390,16 +388,22 @@ export default function SalaryManagement() {
                                     <td>₹${item.basic_salary}</td>
                                 </tr>
                                 <tr>
+                                    <td>Per Day Salary</td>
+                                    <td>Basic / Total Days</td>
+                                    <td>₹${perDaySalary.toFixed(2)}</td>
+                                </tr>
+                                <tr>
                                     <td>Worked Days</td>
                                     <td>${item.working_days} Days</td>
                                     <td>-</td>
                                 </tr>
-                                ${item.extra_days > 0 ? `<tr><td style="color: #059669">Bonus</td><td>${item.extra_days} Days</td><td>(+) ₹${Math.round((item.basic_salary / (item.working_days || item.total_days)) * item.extra_days)}</td></tr>` : ""}
-                                ${item.advance > 0 ? `<tr><td style="color: #dc2626">Salary Advance</td><td>-</td><td>(-) ₹${item.advance}</td></tr>` : ""}
-                                ${item.absent > 0 ? `<tr><td style="color: #dc2626">Absents Deduction</td><td>${item.absent} Days</td><td>(-) ₹${Math.round((item.basic_salary / (item.working_days || item.total_days)) * item.absent)}</td></tr>` : ""}
-                                ${item.half_day > 0 ? `<tr><td style="color: #dc2626">Half Day Deduction</td><td>${item.half_day} Half Days</td><td>(-) ₹${Math.round((item.basic_salary / (item.working_days || item.total_days)) * item.half_day * 0.5)}</td></tr>` : ""}
-                                ${item.biometric_mismatch > 0 ? `<tr><td style="color: #dc2626">Bio Mismatch Penalty</td><td>${item.biometric_mismatch} Mismatch</td><td>(-) ₹${item.biometric_mismatch * 100}</td></tr>` : ""}
-                                ${item.late_comers > 0 ? `<tr><td style="color: #dc2626">Late Coming Penalty</td><td>${item.late_comers} Late</td><td>(-) ₹${item.late_comers * 50}</td></tr>` : ""}
+                                <tr>
+                                    <td>Salary Based on Working Days</td>
+                                    <td>Per Day × Working Days</td>
+                                    <td>₹${salaryBasedOnWorkingDays.toFixed(2)}</td>
+                                </tr>
+                                ${item.biometric_mismatch > 0 ? `<tr><td style="color: #dc2626">Bio Mismatch Deduction</td><td>-</td><td>(-) ₹${item.biometric_mismatch}</td></tr>` : ""}
+                                ${item.late_comers > 0 ? `<tr><td style="color: #dc2626">Late Comers Deduction</td><td>-</td><td>(-) ₹${item.late_comers}</td></tr>` : ""}
                             </tbody>
                         </table>
 
@@ -432,6 +436,9 @@ export default function SalaryManagement() {
 
     const downloadSalarySlipAsDoc = (item) => {
         const monthName = formatMonthDisplay(item.salary_month);
+        const perDaySalary = item.total_days > 0 ? (item.basic_salary / item.total_days) : 0;
+        const salaryBasedOnWorkingDays = perDaySalary * (item.working_days || 0);
+
         const htmlContent = `
             <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
             <head><meta charset='utf-8'><title>Salary Slip</title>
@@ -457,19 +464,19 @@ export default function SalaryManagement() {
                     </div>
                     <table class="table">
                         <thead>
-                            <tr><th>Description</th><th>Value</th></tr>
+                            <tr><th>Description</th><th>Details</th><th>Value</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>Basic Salary</td><td>₹${item.basic_salary}</td></tr>
-                            <tr><td>Total Days</td><td>${item.total_days}</td></tr>
-                            <tr><td>Working Days</td><td>${item.working_days}</td></tr>
-                            <tr><td>Extra Days</td><td>${item.extra_days}</td></tr>
-                            <tr><td>Advance</td><td>₹${item.advance}</td></tr>
-                            <tr><td>Absent</td><td>${item.absent}</td></tr>
+                            <tr><td>Basic Salary</td><td>${item.total_days} Days</td><td>₹${item.basic_salary}</td></tr>
+                            <tr><td>Per Day Salary</td><td>Basic / Total Days</td><td>₹${perDaySalary.toFixed(2)}</td></tr>
+                            <tr><td>Working Days</td><td>${item.working_days} Days</td><td>-</td></tr>
+                            <tr><td>Salary Based on Working Days</td><td>Per Day × Working Days</td><td>₹${salaryBasedOnWorkingDays.toFixed(2)}</td></tr>
+                            <tr><td>Bio Mismatch Deduction</td><td>-</td><td>₹${item.biometric_mismatch}</td></tr>
+                            <tr><td>Late Comers Deduction</td><td>-</td><td>₹${item.late_comers}</td></tr>
                         </tbody>
                     </table>
                     <div class="total">
-                        <p>NET PAYABLE: ₹${item.final_amt}</p>
+                        <p>NET PAYABLE: ₹${item.round_off}</p>
                     </div>
                 </div>
             </body>
@@ -488,6 +495,9 @@ export default function SalaryManagement() {
 
     const downloadSalarySlipAsPDF = (item) => {
         const monthName = formatMonthDisplay(item.salary_month);
+        const perDaySalary = item.total_days > 0 ? (item.basic_salary / item.total_days) : 0;
+        const salaryBasedOnWorkingDays = perDaySalary * (item.working_days || 0);
+
         const element = document.createElement("div");
         element.style.padding = "40px";
         element.style.fontFamily = "Arial, sans-serif";
@@ -514,22 +524,33 @@ export default function SalaryManagement() {
                     <thead>
                         <tr style="background: #f1f5f9;">
                             <th style="padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; color: #64748b;">Description</th>
-                            <th style="padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; color: #64748b;">Days</th>
+                            <th style="padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; color: #64748b;">Details</th>
                             <th style="padding: 12px; text-align: right; font-size: 12px; text-transform: uppercase; color: #64748b;">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Basic Salary</td>
-                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">${item.total_days}</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">${item.total_days} Days</td>
                             <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; text-align: right;">₹${item.basic_salary}</td>
                         </tr>
-                        ${item.extra_days > 0 ? `<tr><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #059669; font-weight: 600;">Bonus</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">${item.extra_days}</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #059669;">(+) ₹${Math.round((item.basic_salary / (item.working_days || item.total_days)) * item.extra_days)}</td></tr>` : ""}
-                        ${item.advance > 0 ? `<tr><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #dc2626; font-weight: 600;">Salary Advance</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">-</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #dc2626;">(-) ₹${item.advance}</td></tr>` : ""}
-                        ${item.absent > 0 ? `<tr><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #dc2626; font-weight: 600;">Absents Deduction</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">${item.absent}</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #dc2626;">(-) ₹${Math.round((item.basic_salary / (item.working_days || item.total_days)) * item.absent)}</td></tr>` : ""}
-                        ${item.half_day > 0 ? `<tr><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #dc2626; font-weight: 600;">Half Day Deduction</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">${item.half_day}</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #dc2626;">(-) ₹${Math.round((item.basic_salary / (item.working_days || item.total_days)) * item.half_day * 0.5)}</td></tr>` : ""}
-                        ${item.biometric_mismatch > 0 ? `<tr><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #dc2626; font-weight: 600;">Bio Mismatch Penalty</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">${item.biometric_mismatch}</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #dc2626;">(-) ₹${item.biometric_mismatch * 100}</td></tr>` : ""}
-                        ${item.late_comers > 0 ? `<tr><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #dc2626; font-weight: 600;">Late Comers Penalty</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">${item.late_comers}</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #dc2626;">(-) ₹${item.late_comers * 50}</td></tr>` : ""}
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Per Day Salary</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">Basic / Total Days</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; text-align: right;">₹${perDaySalary.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Worked Days</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">${item.working_days} Days</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; text-align: right;">-</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Salary Based on Working Days</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">Per Day × Working Days</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; text-align: right;">₹${salaryBasedOnWorkingDays.toFixed(2)}</td>
+                        </tr>
+                        ${item.biometric_mismatch > 0 ? `<tr><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #dc2626; font-weight: 600;">Bio Mismatch Deduction</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">-</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #dc2626;">(-) ₹${item.biometric_mismatch}</td></tr>` : ""}
+                        ${item.late_comers > 0 ? `<tr><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #dc2626; font-weight: 600;">Late Comers Deduction</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">-</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #dc2626;">(-) ₹${item.late_comers}</td></tr>` : ""}
                     </tbody>
                 </table>
 
@@ -676,6 +697,11 @@ export default function SalaryManagement() {
                                                 placeholder="0"
                                             />
                                         </div>
+                                        {row.basic_salary > 0 && row.total_days > 0 && (
+                                            <div className="text-[10px] text-purple-600 font-bold mt-1.5 ml-1">
+                                                Per Day: ₹{(row.basic_salary / row.total_days).toFixed(2)}
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Total Days */}
@@ -700,81 +726,41 @@ export default function SalaryManagement() {
                                             className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                             placeholder="0"
                                         />
+                                        {row.basic_salary > 0 && row.total_days > 0 && row.working_days > 0 && (
+                                            <div className="text-[10px] text-purple-600 font-bold mt-1.5 ml-1">
+                                                Based on Work: ₹{((row.basic_salary / row.total_days) * row.working_days).toFixed(2)}
+                                            </div>
+                                        )}
                                     </div>
 
-                                    {/* Bonus */}
+                                    {/* Bio Mismatch Deduction */}
                                     <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Bonus</label>
-                                        <input 
-                                            type="number" 
-                                            value={row.extra_days || ""} 
-                                            onChange={(e) => handleInputChange(index, "extra_days", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
-                                            placeholder="0"
-                                        />
-                                    </div>
-
-                                    {/* Advance */}
-                                    <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Advance</label>
+                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Bio Mismatch Deduction</label>
                                         <div className="relative">
                                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
                                             <input 
                                                 type="number" 
-                                                value={row.advance || ""} 
-                                                onChange={(e) => handleInputChange(index, "advance", e.target.value)}
+                                                value={row.biometric_mismatch || ""} 
+                                                onChange={(e) => handleInputChange(index, "biometric_mismatch", e.target.value)}
                                                 className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-red-500 focus:bg-white focus:border-red-500 outline-none transition-all"
                                                 placeholder="0"
                                             />
                                         </div>
                                     </div>
 
-                                    {/* Absent */}
+                                    {/* Late Comers Deduction */}
                                     <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Absent</label>
-                                        <input 
-                                            type="number" 
-                                            value={row.absent || ""} 
-                                            onChange={(e) => handleInputChange(index, "absent", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
-                                            placeholder="0"
-                                        />
-                                    </div>
-
-                                    {/* Half Day */}
-                                    <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Half Day</label>
-                                        <input 
-                                            type="number" 
-                                            value={row.half_day || ""} 
-                                            onChange={(e) => handleInputChange(index, "half_day", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
-                                            placeholder="0"
-                                        />
-                                    </div>
-
-                                    {/* Bio Mismatch */}
-                                    <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Bio Mismatch</label>
-                                        <input 
-                                            type="number" 
-                                            value={row.biometric_mismatch || ""} 
-                                            onChange={(e) => handleInputChange(index, "biometric_mismatch", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
-                                            placeholder="0"
-                                        />
-                                    </div>
-
-                                    {/* Late Comers */}
-                                    <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Late Comers</label>
-                                        <input 
-                                            type="number" 
-                                            value={row.late_comers || ""} 
-                                            onChange={(e) => handleInputChange(index, "late_comers", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
-                                            placeholder="0"
-                                        />
+                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Late Comers Deduction</label>
+                                        <div className="relative">
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                                            <input 
+                                                type="number" 
+                                                value={row.late_comers || ""} 
+                                                onChange={(e) => handleInputChange(index, "late_comers", e.target.value)}
+                                                className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-red-500 focus:bg-white focus:border-red-500 outline-none transition-all"
+                                                placeholder="0"
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* Final Amount */}
@@ -795,13 +781,16 @@ export default function SalaryManagement() {
                                     {/* Round Off */}
                                     <div>
                                         <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Round Off</label>
-                                        <input 
-                                            type="number" 
-                                            value={row.round_off || ""} 
-                                            onChange={(e) => handleInputChange(index, "round_off", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
-                                            placeholder="0"
-                                        />
+                                        <div className="relative">
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                                            <input 
+                                                type="number" 
+                                                value={row.round_off || ""} 
+                                                onChange={(e) => handleInputChange(index, "round_off", e.target.value)}
+                                                className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
+                                                placeholder="0"
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* Remarks */}
@@ -869,11 +858,10 @@ export default function SalaryManagement() {
                                         <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Total Days</th>
                                         <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Work. Days</th>
                                         <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Basic</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Extra</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Adv.</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Abs.</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider text-center">Bio</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider text-center">Late</th>
+                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Per Day</th>
+                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Work Salary</th>
+                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider text-center">Bio Ded.</th>
+                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider text-center">Late Ded.</th>
                                         <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Round Off</th>
                                         <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Remarks</th>
                                         <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider text-center">Slip</th>
@@ -883,65 +871,68 @@ export default function SalaryManagement() {
                                 <tbody>
                                     {isLoadingData ? (
                                         <tr>
-                                            <td colSpan="9" className="p-8 text-center text-gray-400 font-medium">
+                                            <td colSpan="13" className="p-8 text-center text-gray-400 font-medium">
                                                 <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
                                                 Loading submitted records...
                                             </td>
                                         </tr>
                                     ) : submittedData.length === 0 ? (
                                         <tr>
-                                            <td colSpan="12" className="p-8 text-center text-gray-400 font-medium">
+                                            <td colSpan="13" className="p-8 text-center text-gray-400 font-medium">
                                                 No records found for this month.
                                             </td>
                                         </tr>
                                     ) : (
-                                        submittedData.map((item, i) => (
-                                            <tr key={item.id} className="border-b border-gray-50 hover:bg-green-50/20 transition-colors">
-                                                <td className="py-2.5 px-4 text-sm font-bold text-gray-400">{item.sr_no}</td>
-                                                <td className="py-2.5 px-4 text-sm font-bold text-gray-700">{item.employee_name}</td>
-                                                <td className="py-2.5 px-4 text-sm font-bold text-gray-400">{item.total_days}</td>
-                                                <td className="py-2.5 px-4 text-sm font-bold text-gray-600">{item.working_days}</td>
-                                                <td className="py-2.5 px-4 text-sm font-black text-purple-600">₹{item.basic_salary}</td>
-                                                <td className="py-2.5 px-4 text-sm font-bold text-gray-600">{item.extra_days} days</td>
-                                                <td className="py-2.5 px-4 text-sm font-bold text-red-500">₹{item.advance}</td>
-                                                <td className="py-2.5 px-4 text-sm font-bold text-red-500">{item.absent} days</td>
-                                                <td className="py-2.5 px-4 text-sm font-bold text-red-400 text-center">{item.biometric_mismatch}</td>
-                                                <td className="py-2.5 px-4 text-sm font-bold text-red-400 text-center">{item.late_comers}</td>
-                                                <td className="py-2.5 px-4">
-                                                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-black">
-                                                        ₹{item.round_off}
-                                                    </span>
-                                                </td>
-                                                <td className="py-2.5 px-4 text-xs italic text-gray-500">{item.remarks}</td>
-                                                <td className="py-2.5 px-4 text-center">
-                                                    <div className="flex items-center justify-center gap-2">
+                                        submittedData.map((item, i) => {
+                                            const perDay = item.total_days > 0 ? (item.basic_salary / item.total_days) : 0;
+                                            const workSalary = perDay * (item.working_days || 0);
+                                            return (
+                                                <tr key={item.id} className="border-b border-gray-50 hover:bg-green-50/20 transition-colors">
+                                                    <td className="py-2.5 px-4 text-sm font-bold text-gray-400">{item.sr_no}</td>
+                                                    <td className="py-2.5 px-4 text-sm font-bold text-gray-700">{item.employee_name}</td>
+                                                    <td className="py-2.5 px-4 text-sm font-bold text-gray-400">{item.total_days}</td>
+                                                    <td className="py-2.5 px-4 text-sm font-bold text-gray-600">{item.working_days}</td>
+                                                    <td className="py-2.5 px-4 text-sm font-black text-purple-600">₹{item.basic_salary}</td>
+                                                    <td className="py-2.5 px-4 text-sm font-bold text-purple-500">₹{perDay.toFixed(2)}</td>
+                                                    <td className="py-2.5 px-4 text-sm font-bold text-purple-700">₹{workSalary.toFixed(2)}</td>
+                                                    <td className="py-2.5 px-4 text-sm font-bold text-red-500 text-center">₹{item.biometric_mismatch}</td>
+                                                    <td className="py-2.5 px-4 text-sm font-bold text-red-500 text-center">₹{item.late_comers}</td>
+                                                    <td className="py-2.5 px-4">
+                                                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-black">
+                                                            ₹{item.round_off}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-2.5 px-4 text-xs italic text-gray-500">{item.remarks}</td>
+                                                    <td className="py-2.5 px-4 text-center">
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            <button 
+                                                                onClick={() => downloadSalarySlip(item)}
+                                                                className="p-2 text-purple-600 hover:bg-purple-50 rounded-xl transition-all"
+                                                                title="View Slip"
+                                                            >
+                                                                <FileText size={16} />
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => downloadSalarySlipAsPDF(item)}
+                                                                className="p-2 text-green-600 hover:bg-green-50 rounded-xl transition-all"
+                                                                title="Download PDF"
+                                                            >
+                                                                <Download size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-2.5 px-4 text-center">
                                                         <button 
-                                                            onClick={() => downloadSalarySlip(item)}
-                                                            className="p-2 text-purple-600 hover:bg-purple-50 rounded-xl transition-all"
-                                                            title="View Slip"
+                                                            onClick={() => deleteRecord(item.id)}
+                                                            className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                                            title="Delete Record"
                                                         >
-                                                            <FileText size={16} />
+                                                            <Trash2 size={16} />
                                                         </button>
-                                                        <button 
-                                                            onClick={() => downloadSalarySlipAsPDF(item)}
-                                                            className="p-2 text-green-600 hover:bg-green-50 rounded-xl transition-all"
-                                                            title="Download PDF"
-                                                        >
-                                                            <Download size={16} />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                                <td className="py-2.5 px-4 text-center">
-                                                    <button 
-                                                        onClick={() => deleteRecord(item.id)}
-                                                        className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                                                        title="Delete Record"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
                                     )}
                                 </tbody>
                             </table>
@@ -959,55 +950,68 @@ export default function SalaryManagement() {
                                     No records found.
                                 </div>
                             ) : (
-                                submittedData.map((item) => (
-                                    <div key={item.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm space-y-4">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Employee</span>
-                                                <h4 className="text-base font-black text-gray-800">{item.employee_name}</h4>
+                                submittedData.map((item) => {
+                                    const perDay = item.total_days > 0 ? (item.basic_salary / item.total_days) : 0;
+                                    const workSalary = perDay * (item.working_days || 0);
+                                    return (
+                                        <div key={item.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Employee</span>
+                                                    <h4 className="text-base font-black text-gray-800">{item.employee_name}</h4>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="text-[10px] font-black text-green-400 uppercase tracking-widest">Round Off</span>
+                                                    <div className="text-lg font-black text-green-600">₹{item.round_off}</div>
+                                                </div>
                                             </div>
-                                            <div className="text-right">
-                                                <span className="text-[10px] font-black text-green-400 uppercase tracking-widest">Round Off</span>
-                                                <div className="text-lg font-black text-green-600">₹{item.round_off}</div>
-                                            </div>
-                                        </div>
 
-                                        <div className="grid grid-cols-2 gap-4 py-3 border-y border-gray-50">
-                                            <div>
-                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Work. Days</span>
-                                                <span className="text-sm font-bold text-gray-700">{item.working_days} / {item.total_days}</span>
+                                            <div className="grid grid-cols-2 gap-4 py-3 border-y border-gray-50">
+                                                <div>
+                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Work. Days</span>
+                                                    <span className="text-sm font-bold text-gray-700">{item.working_days} / {item.total_days}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Basic Salary</span>
+                                                    <span className="text-sm font-bold text-purple-600">₹{item.basic_salary}</span>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Basic Salary</span>
-                                                <span className="text-sm font-bold text-purple-600">₹{item.basic_salary}</span>
-                                            </div>
-                                        </div>
 
-                                        <div className="py-3 border-b border-gray-50">
-                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Deductions</span>
-                                            <div className="flex flex-wrap gap-2">
-                                                <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold">Adv: ₹{item.advance}</span>
-                                                <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold">Abs: {item.absent}d</span>
-                                                <span className="px-2 py-1 bg-orange-50 text-orange-600 rounded-lg text-[10px] font-bold">Bio: {item.biometric_mismatch}</span>
-                                                <span className="px-2 py-1 bg-orange-50 text-orange-600 rounded-lg text-[10px] font-bold">Late: {item.late_comers}</span>
+                                            <div className="grid grid-cols-2 gap-4 py-3 border-b border-gray-50">
+                                                <div>
+                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Per Day</span>
+                                                    <span className="text-sm font-bold text-purple-500">₹{perDay.toFixed(2)}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Work Salary</span>
+                                                    <span className="text-sm font-bold text-purple-700">₹{workSalary.toFixed(2)}</span>
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div className="flex items-center justify-between pt-2">
-                                            <div className="flex gap-2">
-                                                <button onClick={() => downloadSalarySlip(item)} className="p-2.5 bg-purple-50 text-purple-600 rounded-xl flex items-center gap-2 text-xs font-bold transition-all active:scale-95">
-                                                    <FileText size={14} /> View
+                                            <div className="py-3 border-b border-gray-50">
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Deductions</span>
+                                                <div className="flex flex-wrap gap-2">
+                                                    <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold">Bio Ded: ₹{item.biometric_mismatch}</span>
+                                                    <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold">Late Ded: ₹{item.late_comers}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between pt-2">
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => downloadSalarySlip(item)} className="p-2.5 bg-purple-50 text-purple-600 rounded-xl flex items-center gap-2 text-xs font-bold transition-all active:scale-95">
+                                                        <FileText size={14} /> View
+                                                    </button>
+                                                    <button onClick={() => downloadSalarySlipAsPDF(item)} className="p-2.5 bg-green-50 text-green-600 rounded-xl flex items-center gap-2 text-xs font-bold transition-all active:scale-95">
+                                                        <Download size={14} /> PDF
+                                                    </button>
+                                                </div>
+                                                <button onClick={() => deleteRecord(item.id)} className="p-2.5 bg-red-50 text-red-500 rounded-xl transition-all active:scale-95">
+                                                    <Trash2 size={16} />
                                                 </button>
-                                                <button onClick={() => downloadSalarySlipAsPDF(item)} className="p-2.5 bg-green-50 text-green-600 rounded-xl flex items-center gap-2 text-xs font-bold transition-all active:scale-95">
-                                                    <Download size={14} /> PDF
-                                                </button>
                                             </div>
-                                            <button onClick={() => deleteRecord(item.id)} className="p-2.5 bg-red-50 text-red-500 rounded-xl transition-all active:scale-95">
-                                                <Trash2 size={16} />
-                                            </button>
                                         </div>
-                                    </div>
-                                ))
+                                    );
+                                })
                             )}
                         </div>
                     </div>
