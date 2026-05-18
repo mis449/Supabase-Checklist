@@ -30,6 +30,14 @@ const formatMonthDisplay = (monthStr) => {
     return `${year}-${monthName}`;
 };
 
+const formatPeriod = (monthStr) => {
+    if (!monthStr) return "";
+    const [year, month] = monthStr.split("-");
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    const monthName = date.toLocaleString('default', { month: 'short' }).toUpperCase();
+    return `${monthName} ${year}`;
+};
+
 export default function SalaryManagement() {
     const navigate = useNavigate();
     const { showToast } = useMagicToast();
@@ -125,15 +133,20 @@ export default function SalaryManagement() {
         const basic = parseFloat(row.basic_salary) || 0;
         const totalDays = parseFloat(row.total_days) || 0;
         const workingDays = parseFloat(row.working_days) || 0;
+        const extraDays = parseFloat(row.extra_days) || 0;
+        const advance = parseFloat(row.advance) || 0;
+        const absent = parseFloat(row.absent) || 0;
+        const halfDay = parseFloat(row.half_day) || 0;
         const bioMismatch = parseFloat(row.biometric_mismatch) || 0;
         const lateComers = parseFloat(row.late_comers) || 0;
         
         if (totalDays <= 0) return 0;
         
         const perDaySalary = basic / totalDays;
-        const salaryBasedOnWorkingDays = perDaySalary * workingDays;
+        const paidDays = workingDays + extraDays - absent - (halfDay / 2);
+        const salaryBasedOnPaidDays = perDaySalary * paidDays;
         
-        const total = salaryBasedOnWorkingDays - bioMismatch - lateComers;
+        const total = salaryBasedOnPaidDays - advance - bioMismatch - lateComers;
         return Math.round(total);
     };
 
@@ -167,7 +180,7 @@ export default function SalaryManagement() {
         }
 
         // Auto-calculate final amount if any contributing field changes
-        const calculationFields = ["basic_salary", "working_days", "biometric_mismatch", "late_comers", "total_days"];
+        const calculationFields = ["basic_salary", "working_days", "extra_days", "advance", "absent", "half_day", "biometric_mismatch", "late_comers", "total_days"];
         if (calculationFields.includes(field)) {
             const finalAmt = calculateRowFinalAmount(newRows[index]);
             newRows[index].final_amt = finalAmt;
@@ -384,26 +397,49 @@ export default function SalaryManagement() {
                             <tbody>
                                 <tr>
                                     <td>Basic Salary</td>
-                                    <td>${item.total_days} Days (Month)</td>
+                                    <td>-</td>
                                     <td>₹${item.basic_salary}</td>
                                 </tr>
                                 <tr>
-                                    <td>Per Day Salary</td>
-                                    <td>Basic / Total Days</td>
-                                    <td>₹${perDaySalary.toFixed(2)}</td>
+                                    <td>Total Days</td>
+                                    <td>${item.total_days} Days</td>
+                                    <td>-</td>
                                 </tr>
                                 <tr>
-                                    <td>Worked Days</td>
+                                    <td>Working Days</td>
                                     <td>${item.working_days} Days</td>
                                     <td>-</td>
                                 </tr>
                                 <tr>
-                                    <td>Salary Based on Working Days</td>
-                                    <td>Per Day × Working Days</td>
-                                    <td>₹${salaryBasedOnWorkingDays.toFixed(2)}</td>
+                                    <td>Extra Days</td>
+                                    <td>${item.extra_days || 0} Days</td>
+                                    <td>(+) ₹${((item.extra_days || 0) * perDaySalary).toFixed(2)}</td>
                                 </tr>
-                                ${item.biometric_mismatch > 0 ? `<tr><td style="color: #dc2626">Bio Mismatch Deduction</td><td>-</td><td>(-) ₹${item.biometric_mismatch}</td></tr>` : ""}
-                                ${item.late_comers > 0 ? `<tr><td style="color: #dc2626">Late Comers Deduction</td><td>-</td><td>(-) ₹${item.late_comers}</td></tr>` : ""}
+                                <tr>
+                                    <td>Advance</td>
+                                    <td>-</td>
+                                    <td style="color: #dc2626">(-) ₹${item.advance || 0}</td>
+                                </tr>
+                                <tr>
+                                    <td>Absent Days</td>
+                                    <td>${item.absent || 0} Days</td>
+                                    <td style="color: #dc2626">(-) ₹${((item.absent || 0) * perDaySalary).toFixed(2)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Half Days</td>
+                                    <td>${item.half_day || 0} Half Days</td>
+                                    <td style="color: #dc2626">(-) ₹${((item.half_day || 0) * perDaySalary / 2).toFixed(2)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Bio Mismatch </td>
+                                    <td>-</td>
+                                    <td style="color: #dc2626">(-) ₹${item.biometric_mismatch || 0}</td>
+                                </tr>
+                                <tr>
+                                    <td>Late Comer</td>
+                                    <td>-</td>
+                                    <td style="color: #dc2626">(-) ₹${item.late_comers || 0}</td>
+                                </tr>
                             </tbody>
                         </table>
 
@@ -467,12 +503,15 @@ export default function SalaryManagement() {
                             <tr><th>Description</th><th>Details</th><th>Value</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>Basic Salary</td><td>${item.total_days} Days</td><td>₹${item.basic_salary}</td></tr>
-                            <tr><td>Per Day Salary</td><td>Basic / Total Days</td><td>₹${perDaySalary.toFixed(2)}</td></tr>
+                            <tr><td>Basic Salary</td><td>-</td><td>₹${item.basic_salary}</td></tr>
+                            <tr><td>Total Days</td><td>${item.total_days} Days</td><td>-</td></tr>
                             <tr><td>Working Days</td><td>${item.working_days} Days</td><td>-</td></tr>
-                            <tr><td>Salary Based on Working Days</td><td>Per Day × Working Days</td><td>₹${salaryBasedOnWorkingDays.toFixed(2)}</td></tr>
-                            <tr><td>Bio Mismatch Deduction</td><td>-</td><td>₹${item.biometric_mismatch}</td></tr>
-                            <tr><td>Late Comers Deduction</td><td>-</td><td>₹${item.late_comers}</td></tr>
+                            <tr><td>Extra Days</td><td>${item.extra_days || 0} Days</td><td>(+) ₹${((item.extra_days || 0) * perDaySalary).toFixed(2)}</td></tr>
+                            <tr><td>Advance Deduction</td><td>-</td><td>(-) ₹${item.advance || 0}</td></tr>
+                            <tr><td>Absent Days Deduction</td><td>${item.absent || 0} Days</td><td>(-) ₹${((item.absent || 0) * perDaySalary).toFixed(2)}</td></tr>
+                            <tr><td>Half Days</td><td>${item.half_day || 0} Half Days</td><td>(-) ₹${((item.half_day || 0) * perDaySalary / 2).toFixed(2)}</td></tr>
+                            <tr><td>Bio Mismatch Deduction</td><td>-</td><td>(-) ₹${item.biometric_mismatch || 0}</td></tr>
+                            <tr><td>Late Comers Deduction</td><td>-</td><td>(-) ₹${item.late_comers || 0}</td></tr>
                         </tbody>
                     </table>
                     <div class="total">
@@ -531,26 +570,49 @@ export default function SalaryManagement() {
                     <tbody>
                         <tr>
                             <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Basic Salary</td>
-                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">${item.total_days} Days</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">-</td>
                             <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; text-align: right;">₹${item.basic_salary}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Per Day Salary</td>
-                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">Basic / Total Days</td>
-                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; text-align: right;">₹${perDaySalary.toFixed(2)}</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Total Days</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">${item.total_days} Days</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; text-align: right;">-</td>
                         </tr>
                         <tr>
-                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Worked Days</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Working Days</td>
                             <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">${item.working_days} Days</td>
                             <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; text-align: right;">-</td>
                         </tr>
                         <tr>
-                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Salary Based on Working Days</td>
-                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">Per Day × Working Days</td>
-                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; text-align: right;">₹${salaryBasedOnWorkingDays.toFixed(2)}</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Extra Days</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">${item.extra_days || 0} Days</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600; text-align: right;">(+) ₹${((item.extra_days || 0) * perDaySalary).toFixed(2)}</td>
                         </tr>
-                        ${item.biometric_mismatch > 0 ? `<tr><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #dc2626; font-weight: 600;">Bio Mismatch Deduction</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">-</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #dc2626;">(-) ₹${item.biometric_mismatch}</td></tr>` : ""}
-                        ${item.late_comers > 0 ? `<tr><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #dc2626; font-weight: 600;">Late Comers Deduction</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">-</td><td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #dc2626;">(-) ₹${item.late_comers}</td></tr>` : ""}
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Advance Deduction</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">-</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #dc2626; font-weight: 600;">(-) ₹${item.advance || 0}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Absent Days Deduction</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">${item.absent || 0} Days</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #dc2626; font-weight: 600;">(-) ₹${((item.absent || 0) * perDaySalary).toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: 600;">Half Days</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">${item.half_day || 0} Half Days</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #dc2626; font-weight: 600;">(-) ₹${((item.half_day || 0) * perDaySalary / 2).toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #dc2626; font-weight: 600;">Bio Mismatch Deduction</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">-</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #dc2626; font-weight: 600;">(-) ₹${item.biometric_mismatch || 0}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; color: #dc2626; font-weight: 600;">Late Comers Deduction</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">-</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #dc2626; font-weight: 600;">(-) ₹${item.late_comers || 0}</td>
+                        </tr>
                     </tbody>
                 </table>
 
@@ -601,11 +663,11 @@ export default function SalaryManagement() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-2xl bg-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-200">
+                                <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-100/80 flex items-center justify-center text-purple-600 shadow-sm shadow-purple-50/50">
                                     <IndianRupee size={24} />
                                 </div>
                                 <div>
-                                    <h1 className="text-2xl font-black text-gray-900 tracking-tight">Salary Management</h1>
+                                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Salary Management</h1>
                                     <p className="text-sm text-gray-400 font-medium">Record and manage monthly employee salaries</p>
                                 </div>
                             </div>
@@ -615,7 +677,7 @@ export default function SalaryManagement() {
                                     setNewEmp({ name: "", basic_salary: 0 });
                                     setIsEmployeeModalOpen(true);
                                 }}
-                                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl font-bold text-sm hover:bg-purple-700 transition-all shadow-lg shadow-purple-100"
+                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-semibold text-sm transition-all shadow-md shadow-purple-200"
                             >
                                 <Plus size={18} />
                                 Manage Employees
@@ -629,7 +691,7 @@ export default function SalaryManagement() {
                                 type="month" 
                                 value={salaryMonth}
                                 onChange={(e) => setSalaryMonth(e.target.value)}
-                                className="bg-transparent font-bold outline-none text-sm"
+                                className="bg-transparent font-semibold outline-none text-sm"
                             />
                         </div>
                         <button 
@@ -646,17 +708,17 @@ export default function SalaryManagement() {
                     {rows.map((row, index) => (
                         <div key={index} className="bg-white rounded-[2rem] border border-gray-100 shadow-xl shadow-purple-100/20 overflow-hidden transition-all hover:shadow-purple-200/30">
                             {/* Card Header */}
-                            <div className="bg-purple-600 px-6 py-3 flex items-center justify-between">
+                            <div className="bg-purple-100/70 px-6 py-4 flex items-center justify-between border-b border-purple-200/60">
                                 <div className="flex items-center gap-3">
-                                    <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-black text-sm">
+                                    <span className="w-7 h-7 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-sm shadow-purple-200/50">
                                         {row.sr_no}
                                     </span>
-                                    <h3 className="text-white font-bold tracking-tight">Entry Details</h3>
+                                    <h3 className="text-slate-800 font-bold text-sm uppercase tracking-wider">Entry Details</h3>
                                 </div>
                                 {rows.length > 1 && (
                                     <button 
                                         onClick={() => removeRow(index)}
-                                        className="p-1.5 bg-white/10 text-white hover:bg-white/20 rounded-lg transition-all"
+                                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-xl transition-all border border-red-100/50"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -668,13 +730,13 @@ export default function SalaryManagement() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                     {/* Employee Name */}
                                     <div className="lg:col-span-2 xl:col-span-1">
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Employee Name</label>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Employee Name</label>
                                         <div className="relative">
                                             <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                             <select 
                                                 value={row.employee_name}
                                                 onChange={(e) => handleEmployeeChange(index, e.target.value)}
-                                                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all appearance-none"
+                                                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-medium text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all appearance-none"
                                             >
                                                 <option value="">Select Employee</option>
                                                 {employees.map(emp => (
@@ -686,19 +748,19 @@ export default function SalaryManagement() {
 
                                     {/* Basic Salary */}
                                     <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Basic Salary</label>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Basic Salary</label>
                                         <div className="relative">
                                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
                                             <input 
                                                 type="number" 
                                                 value={row.basic_salary || ""} 
                                                 onChange={(e) => handleInputChange(index, "basic_salary", e.target.value)}
-                                                className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-black text-purple-600 focus:bg-white focus:border-purple-500 outline-none transition-all"
+                                                className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-semibold text-purple-600 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                                 placeholder="0"
                                             />
                                         </div>
                                         {row.basic_salary > 0 && row.total_days > 0 && (
-                                            <div className="text-[10px] text-purple-600 font-bold mt-1.5 ml-1">
+                                            <div className="text-[10px] text-purple-600 font-medium mt-1.5 ml-1">
                                                 Per Day: ₹{(row.basic_salary / row.total_days).toFixed(2)}
                                             </div>
                                         )}
@@ -706,43 +768,94 @@ export default function SalaryManagement() {
 
                                     {/* Total Days */}
                                     <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Total Days</label>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Total Days</label>
                                         <input 
                                             type="number" 
                                             value={row.total_days} 
                                             onChange={(e) => handleInputChange(index, "total_days", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-medium text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                             placeholder="0"
                                         />
                                     </div>
 
                                     {/* Working Days */}
                                     <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Working Days</label>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Working Days</label>
                                         <input 
                                             type="number" 
                                             value={row.working_days || ""} 
                                             onChange={(e) => handleInputChange(index, "working_days", e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-medium text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                             placeholder="0"
                                         />
                                         {row.basic_salary > 0 && row.total_days > 0 && row.working_days > 0 && (
-                                            <div className="text-[10px] text-purple-600 font-bold mt-1.5 ml-1">
+                                            <div className="text-[10px] text-purple-600 font-medium mt-1.5 ml-1">
                                                 Based on Work: ₹{((row.basic_salary / row.total_days) * row.working_days).toFixed(2)}
                                             </div>
                                         )}
                                     </div>
 
+                                    {/* Extra Days */}
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Extra Days</label>
+                                        <input 
+                                            type="number" 
+                                            value={row.extra_days || ""} 
+                                            onChange={(e) => handleInputChange(index, "extra_days", e.target.value)}
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-medium text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
+                                            placeholder="0"
+                                        />
+                                    </div>
+
+                                    {/* Advance */}
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Advance</label>
+                                        <div className="relative">
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                                            <input 
+                                                type="number" 
+                                                value={row.advance || ""} 
+                                                onChange={(e) => handleInputChange(index, "advance", e.target.value)}
+                                                className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-medium text-red-500 focus:bg-white focus:border-red-500 outline-none transition-all"
+                                                placeholder="0"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Absent Days */}
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Absent Days</label>
+                                        <input 
+                                            type="number" 
+                                            value={row.absent || ""} 
+                                            onChange={(e) => handleInputChange(index, "absent", e.target.value)}
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-medium text-red-500 focus:bg-white focus:border-red-500 outline-none transition-all"
+                                            placeholder="0"
+                                        />
+                                    </div>
+
+                                    {/* Half Day */}
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Half Day</label>
+                                        <input 
+                                            type="number" 
+                                            value={row.half_day || ""} 
+                                            onChange={(e) => handleInputChange(index, "half_day", e.target.value)}
+                                            className="w-full px-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-medium text-red-500 focus:bg-white focus:border-red-500 outline-none transition-all"
+                                            placeholder="0"
+                                        />
+                                    </div>
+
                                     {/* Bio Mismatch Deduction */}
                                     <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Bio Mismatch Deduction</label>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Bio Mismatch Deduction</label>
                                         <div className="relative">
                                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
                                             <input 
                                                 type="number" 
                                                 value={row.biometric_mismatch || ""} 
                                                 onChange={(e) => handleInputChange(index, "biometric_mismatch", e.target.value)}
-                                                className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-red-500 focus:bg-white focus:border-red-500 outline-none transition-all"
+                                                className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-medium text-red-500 focus:bg-white focus:border-red-500 outline-none transition-all"
                                                 placeholder="0"
                                             />
                                         </div>
@@ -750,14 +863,14 @@ export default function SalaryManagement() {
 
                                     {/* Late Comers Deduction */}
                                     <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Late Comers Deduction</label>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Late Comers Deduction</label>
                                         <div className="relative">
                                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
                                             <input 
                                                 type="number" 
                                                 value={row.late_comers || ""} 
                                                 onChange={(e) => handleInputChange(index, "late_comers", e.target.value)}
-                                                className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-red-500 focus:bg-white focus:border-red-500 outline-none transition-all"
+                                                className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-medium text-red-500 focus:bg-white focus:border-red-500 outline-none transition-all"
                                                 placeholder="0"
                                             />
                                         </div>
@@ -765,14 +878,14 @@ export default function SalaryManagement() {
 
                                     {/* Final Amount */}
                                     <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Final Amount</label>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Final Amount</label>
                                         <div className="relative">
                                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
                                             <input 
                                                 type="number" 
                                                 value={row.final_amt || ""} 
                                                 onChange={(e) => handleInputChange(index, "final_amt", e.target.value)}
-                                                className="w-full pl-8 pr-4 py-2.5 bg-purple-50 border border-purple-200 rounded-2xl text-sm font-black text-purple-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
+                                                className="w-full pl-8 pr-4 py-2.5 bg-purple-50 border border-purple-200 rounded-2xl text-sm font-semibold text-purple-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                                 placeholder="0"
                                             />
                                         </div>
@@ -780,14 +893,14 @@ export default function SalaryManagement() {
 
                                     {/* Round Off */}
                                     <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Round Off</label>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Round Off</label>
                                         <div className="relative">
                                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
                                             <input 
                                                 type="number" 
                                                 value={row.round_off || ""} 
                                                 onChange={(e) => handleInputChange(index, "round_off", e.target.value)}
-                                                className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
+                                                className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-transparent rounded-2xl text-sm font-medium text-gray-700 focus:bg-white focus:border-purple-500 outline-none transition-all"
                                                 placeholder="0"
                                             />
                                         </div>
@@ -795,7 +908,7 @@ export default function SalaryManagement() {
 
                                     {/* Remarks */}
                                     <div className="lg:col-span-2 xl:col-span-1">
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Remarks</label>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Remarks</label>
                                         <input 
                                             type="text" 
                                             value={row.remarks || ""} 
@@ -814,7 +927,7 @@ export default function SalaryManagement() {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <button 
                         onClick={addRow}
-                        className="flex items-center gap-2 px-6 py-3 bg-white text-purple-600 font-bold rounded-2xl border-2 border-purple-100 hover:border-purple-300 hover:bg-purple-50 transition-all shadow-sm"
+                        className="flex items-center gap-2 px-6 py-3 bg-white text-purple-600 font-semibold rounded-2xl border-2 border-purple-100 hover:border-purple-300 hover:bg-purple-50 transition-all shadow-sm"
                     >
                         <Plus size={20} />
                         Add New Row
@@ -824,7 +937,7 @@ export default function SalaryManagement() {
                         <button 
                             onClick={handleSubmit}
                             disabled={isSubmitting}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl shadow-purple-200 transform transition-all active:scale-95 disabled:opacity-70"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold rounded-2xl shadow-xl shadow-purple-200/50 transform transition-all active:scale-95 disabled:opacity-70"
                         >
                             {isSubmitting ? (
                                 <><Loader2 size={20} className="animate-spin" /> Saving...</>
@@ -838,11 +951,11 @@ export default function SalaryManagement() {
                 {/* Submitted Data List */}
                 <div className="mt-12">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2 bg-green-500 rounded-xl text-white shadow-md">
+                        <div className="p-2.5 bg-green-50 text-green-600 border border-green-100/80 rounded-xl shadow-sm shadow-green-50/50">
                             <Save size={18} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-black text-gray-900">Submitted Records ({formatMonthDisplay(salaryMonth)})</h2>
+                            <h2 className="text-xl font-bold text-gray-800">Submitted Records ({formatMonthDisplay(salaryMonth)})</h2>
                             <p className="text-xs text-gray-400 font-medium">History of salary data for this month</p>
                         </div>
                     </div>
@@ -853,52 +966,56 @@ export default function SalaryManagement() {
                             <table className="w-full text-left border-collapse">
                                 <thead className="bg-gray-50 border-b border-gray-100 sticky top-0 z-10 shadow-sm">
                                     <tr>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Sr.No.</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Employee</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Total Days</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Work. Days</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Basic</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Per Day</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Work Salary</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider text-center">Bio Ded.</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider text-center">Late Ded.</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Round Off</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider">Remarks</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider text-center">Slip</th>
-                                        <th className="p-4 text-[10px] font-black uppercase text-gray-400 tracking-wider text-center">Delete</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Sr.No.</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Employee</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Period</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Total Days</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Work. Days</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Basic</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Extra</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Adv.</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Abs.</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider">H.Day</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider text-center">Bio</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider text-center">Late</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Final Amt.</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Remarks</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider text-center">Slip</th>
+                                        <th className="p-4 text-[10px] font-semibold uppercase text-gray-400 tracking-wider text-center">Delete</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {isLoadingData ? (
                                         <tr>
-                                            <td colSpan="13" className="p-8 text-center text-gray-400 font-medium">
+                                            <td colSpan="16" className="p-8 text-center text-gray-400 font-medium">
                                                 <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
                                                 Loading submitted records...
                                             </td>
                                         </tr>
                                     ) : submittedData.length === 0 ? (
                                         <tr>
-                                            <td colSpan="13" className="p-8 text-center text-gray-400 font-medium">
+                                            <td colSpan="16" className="p-8 text-center text-gray-400 font-medium">
                                                 No records found for this month.
                                             </td>
                                         </tr>
                                     ) : (
                                         submittedData.map((item, i) => {
-                                            const perDay = item.total_days > 0 ? (item.basic_salary / item.total_days) : 0;
-                                            const workSalary = perDay * (item.working_days || 0);
                                             return (
                                                 <tr key={item.id} className="border-b border-gray-50 hover:bg-green-50/20 transition-colors">
-                                                    <td className="py-2.5 px-4 text-sm font-bold text-gray-400">{item.sr_no}</td>
-                                                    <td className="py-2.5 px-4 text-sm font-bold text-gray-700">{item.employee_name}</td>
-                                                    <td className="py-2.5 px-4 text-sm font-bold text-gray-400">{item.total_days}</td>
-                                                    <td className="py-2.5 px-4 text-sm font-bold text-gray-600">{item.working_days}</td>
-                                                    <td className="py-2.5 px-4 text-sm font-black text-purple-600">₹{item.basic_salary}</td>
-                                                    <td className="py-2.5 px-4 text-sm font-bold text-purple-500">₹{perDay.toFixed(2)}</td>
-                                                    <td className="py-2.5 px-4 text-sm font-bold text-purple-700">₹{workSalary.toFixed(2)}</td>
-                                                    <td className="py-2.5 px-4 text-sm font-bold text-red-500 text-center">₹{item.biometric_mismatch}</td>
-                                                    <td className="py-2.5 px-4 text-sm font-bold text-red-500 text-center">₹{item.late_comers}</td>
+                                                    <td className="py-2.5 px-4 text-sm font-medium text-gray-400">{i + 1}</td>
+                                                    <td className="py-2.5 px-4 text-sm font-bold text-gray-800 whitespace-nowrap">{item.employee_name}</td>
+                                                    <td className="py-2.5 px-4 text-xs font-semibold text-gray-400 uppercase whitespace-nowrap">{formatPeriod(item.salary_month)}</td>
+                                                    <td className="py-2.5 px-4 text-sm font-bold text-gray-800">{item.total_days}</td>
+                                                    <td className="py-2.5 px-4 text-sm font-bold text-gray-800">{item.working_days}</td>
+                                                    <td className="py-2.5 px-4 text-sm font-bold text-blue-600 whitespace-nowrap">₹{item.basic_salary}</td>
+                                                    <td className="py-2.5 px-4 text-sm font-medium text-gray-700 whitespace-nowrap">{item.extra_days || 0} days</td>
+                                                    <td className={`py-2.5 px-4 text-sm font-semibold whitespace-nowrap ${item.advance > 0 ? "text-red-500" : "text-gray-700"}`}>₹{item.advance || 0}</td>
+                                                    <td className={`py-2.5 px-4 text-sm font-medium whitespace-nowrap ${item.absent > 0 ? "text-red-500" : "text-gray-700"}`}>{item.absent || 0} days</td>
+                                                    <td className={`py-2.5 px-4 text-sm font-medium whitespace-nowrap ${item.half_day > 0 ? "text-red-500" : "text-gray-700"}`}>{item.half_day || 0} days</td>
+                                                    <td className={`py-2.5 px-4 text-sm font-semibold text-center ${item.biometric_mismatch > 0 ? "text-red-500" : "text-gray-700"}`}>{item.biometric_mismatch || 0}</td>
+                                                    <td className={`py-2.5 px-4 text-sm font-semibold text-center ${item.late_comers > 0 ? "text-red-500" : "text-gray-700"}`}>{item.late_comers || 0}</td>
                                                     <td className="py-2.5 px-4">
-                                                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-black">
+                                                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
                                                             ₹{item.round_off}
                                                         </span>
                                                     </td>
@@ -952,56 +1069,65 @@ export default function SalaryManagement() {
                             ) : (
                                 submittedData.map((item) => {
                                     const perDay = item.total_days > 0 ? (item.basic_salary / item.total_days) : 0;
-                                    const workSalary = perDay * (item.working_days || 0);
+                                    const paidDays = (item.working_days || 0) + (item.extra_days || 0) - (item.absent || 0) - ((item.half_day || 0) / 2);
+                                    const workSalary = perDay * paidDays;
                                     return (
                                         <div key={item.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm space-y-4">
                                             <div className="flex justify-between items-start">
                                                 <div>
-                                                    <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Employee</span>
-                                                    <h4 className="text-base font-black text-gray-800">{item.employee_name}</h4>
+                                                    <span className="text-[10px] font-semibold text-purple-400 uppercase tracking-widest block">{formatPeriod(item.salary_month)}</span>
+                                                    <h4 className="text-base font-bold text-gray-800">{item.employee_name}</h4>
                                                 </div>
                                                 <div className="text-right">
-                                                    <span className="text-[10px] font-black text-green-400 uppercase tracking-widest">Round Off</span>
-                                                    <div className="text-lg font-black text-green-600">₹{item.round_off}</div>
+                                                    <span className="text-[10px] font-semibold text-green-400 uppercase tracking-widest">Final Amt.</span>
+                                                    <div className="text-lg font-bold text-green-600">₹{item.round_off}</div>
                                                 </div>
                                             </div>
 
                                             <div className="grid grid-cols-2 gap-4 py-3 border-y border-gray-50">
                                                 <div>
-                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Work. Days</span>
-                                                    <span className="text-sm font-bold text-gray-700">{item.working_days} / {item.total_days}</span>
+                                                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest block mb-1">Work. Days</span>
+                                                    <span className="text-sm font-medium text-gray-700">{item.working_days} / {item.total_days}</span>
                                                 </div>
                                                 <div>
-                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Basic Salary</span>
-                                                    <span className="text-sm font-bold text-purple-600">₹{item.basic_salary}</span>
+                                                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest block mb-1">Basic Salary</span>
+                                                    <span className="text-sm font-semibold text-purple-600">₹{item.basic_salary}</span>
                                                 </div>
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-4 py-3 border-b border-gray-50">
+                                            <div className="grid grid-cols-4 gap-2 py-3 border-b border-gray-50">
                                                 <div>
-                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Per Day</span>
-                                                    <span className="text-sm font-bold text-purple-500">₹{perDay.toFixed(2)}</span>
+                                                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest block mb-1">Extra</span>
+                                                    <span className="text-xs font-semibold text-gray-700">{item.extra_days || 0}d</span>
                                                 </div>
                                                 <div>
-                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Work Salary</span>
-                                                    <span className="text-sm font-bold text-purple-700">₹{workSalary.toFixed(2)}</span>
+                                                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest block mb-1">Adv.</span>
+                                                    <span className="text-xs font-semibold text-red-500">₹{item.advance || 0}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest block mb-1">Abs.</span>
+                                                    <span className="text-xs font-semibold text-red-500">{item.absent || 0}d</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest block mb-1">H.Day</span>
+                                                    <span className="text-xs font-semibold text-red-500">{item.half_day || 0}d</span>
                                                 </div>
                                             </div>
 
                                             <div className="py-3 border-b border-gray-50">
-                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Deductions</span>
+                                                <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest block mb-1">Deductions</span>
                                                 <div className="flex flex-wrap gap-2">
-                                                    <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold">Bio Ded: ₹{item.biometric_mismatch}</span>
-                                                    <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold">Late Ded: ₹{item.late_comers}</span>
+                                                    <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-medium">Bio: {item.biometric_mismatch || 0}</span>
+                                                    <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-medium">Late: {item.late_comers || 0}</span>
                                                 </div>
                                             </div>
 
                                             <div className="flex items-center justify-between pt-2">
                                                 <div className="flex gap-2">
-                                                    <button onClick={() => downloadSalarySlip(item)} className="p-2.5 bg-purple-50 text-purple-600 rounded-xl flex items-center gap-2 text-xs font-bold transition-all active:scale-95">
+                                                    <button onClick={() => downloadSalarySlip(item)} className="p-2.5 bg-purple-50 text-purple-600 rounded-xl flex items-center gap-2 text-xs font-semibold transition-all active:scale-95">
                                                         <FileText size={14} /> View
                                                     </button>
-                                                    <button onClick={() => downloadSalarySlipAsPDF(item)} className="p-2.5 bg-green-50 text-green-600 rounded-xl flex items-center gap-2 text-xs font-bold transition-all active:scale-95">
+                                                    <button onClick={() => downloadSalarySlipAsPDF(item)} className="p-2.5 bg-green-50 text-green-600 rounded-xl flex items-center gap-2 text-xs font-semibold transition-all active:scale-95">
                                                         <Download size={14} /> PDF
                                                     </button>
                                                 </div>
@@ -1032,14 +1158,14 @@ export default function SalaryManagement() {
             {isEmployeeModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto">
                     <div className="bg-white rounded-[2rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200 my-8">
-                        <div className="bg-purple-600 px-6 py-4 flex items-center justify-between">
-                            <h3 className="text-white font-bold tracking-tight">
+                        <div className="bg-slate-50 border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+                            <h3 className="text-gray-800 font-bold tracking-tight">
                                 {newEmp.id ? "Edit Employee" : "Add New Employee"}
                             </h3>
                             <button onClick={() => {
                                 setIsEmployeeModalOpen(false);
                                 setNewEmp({ name: "", basic_salary: 0 });
-                            }} className="text-white/80 hover:text-white transition-colors">
+                            }} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <Plus className="rotate-45" size={24} />
                             </button>
                         </div>
@@ -1049,7 +1175,7 @@ export default function SalaryManagement() {
                             <form onSubmit={handleAddEmployee} className="bg-gray-50 p-4 rounded-3xl space-y-4">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Full Name</label>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Full Name</label>
                                         <div className="relative">
                                             <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                             <input 
@@ -1057,13 +1183,13 @@ export default function SalaryManagement() {
                                                 required
                                                 value={newEmp.name}
                                                 onChange={(e) => setNewEmp({...newEmp, name: e.target.value})}
-                                                className="w-full pl-10 pr-4 py-2 bg-white border border-transparent rounded-2xl text-sm font-bold text-gray-700 focus:border-purple-500 outline-none transition-all shadow-sm"
+                                                className="w-full pl-10 pr-4 py-2 bg-white border border-transparent rounded-2xl text-sm font-medium text-gray-700 focus:border-purple-500 outline-none transition-all shadow-sm"
                                                 placeholder="Employee name"
                                             />
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Basic Salary</label>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Basic Salary</label>
                                         <div className="relative">
                                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
                                             <input 
@@ -1071,7 +1197,7 @@ export default function SalaryManagement() {
                                                 required
                                                 value={newEmp.basic_salary || ""}
                                                 onChange={(e) => setNewEmp({...newEmp, basic_salary: parseFloat(e.target.value) || 0})}
-                                                className="w-full pl-8 pr-4 py-2 bg-white border border-transparent rounded-2xl text-sm font-black text-purple-600 focus:border-purple-500 outline-none transition-all shadow-sm"
+                                                className="w-full pl-8 pr-4 py-2 bg-white border border-transparent rounded-2xl text-sm font-semibold text-purple-600 focus:border-purple-500 outline-none transition-all shadow-sm"
                                                 placeholder="0"
                                             />
                                         </div>
@@ -1081,7 +1207,7 @@ export default function SalaryManagement() {
                                     <button 
                                         type="submit" 
                                         disabled={isSavingEmp}
-                                        className="flex-1 py-2.5 bg-purple-600 text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-purple-700 disabled:bg-gray-300 transition-all shadow-lg shadow-purple-100 flex items-center justify-center gap-2"
+                                        className="flex-1 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-semibold uppercase tracking-widest text-[10px] disabled:bg-gray-300 transition-all shadow-lg shadow-purple-100 flex items-center justify-center gap-2"
                                     >
                                         {isSavingEmp ? <Loader2 className="animate-spin" size={14} /> : <Plus size={14} />}
                                         {newEmp.id ? "Update" : "Add Employee"}
@@ -1090,7 +1216,7 @@ export default function SalaryManagement() {
                                         <button 
                                             type="button"
                                             onClick={() => setNewEmp({ name: "", basic_salary: 0 })}
-                                            className="px-4 py-2.5 bg-gray-200 text-gray-600 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-gray-300 transition-all"
+                                            className="px-4 py-2.5 bg-gray-200 text-gray-600 rounded-xl font-semibold uppercase tracking-widest text-[10px] hover:bg-gray-300 transition-all"
                                         >
                                             Cancel
                                         </button>
@@ -1100,21 +1226,21 @@ export default function SalaryManagement() {
 
                             {/* List Section */}
                             <div>
-                                <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Existing Employees ({employees.length})</h4>
+                                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Existing Employees ({employees.length})</h4>
                                 <div className="max-h-[400px] overflow-y-auto border border-gray-100 rounded-3xl overflow-hidden scrollbar-thin scrollbar-thumb-gray-200">
                                     <table className="w-full text-left border-collapse">
                                         <thead className="bg-gray-50 border-b border-gray-100 sticky top-0 z-10 shadow-sm">
                                             <tr>
-                                                <th className="p-3 text-[10px] font-black uppercase text-gray-400 tracking-wider">Name</th>
-                                                <th className="p-3 text-[10px] font-black uppercase text-gray-400 tracking-wider">Salary</th>
-                                                <th className="p-3 text-[10px] font-black uppercase text-gray-400 tracking-wider text-right">Actions</th>
+                                                <th className="p-3 text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Name</th>
+                                                <th className="p-3 text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Salary</th>
+                                                <th className="p-3 text-[10px] font-semibold uppercase text-gray-400 tracking-wider text-right">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-50">
                                             {employees.map(emp => (
                                                 <tr key={emp.id} className="hover:bg-purple-50/30 transition-colors">
-                                                    <td className="p-3 text-sm font-bold text-gray-700">{emp.name}</td>
-                                                    <td className="p-3 text-sm font-black text-purple-600">₹{emp.basic_salary}</td>
+                                                    <td className="p-3 text-sm font-semibold text-gray-700">{emp.name}</td>
+                                                    <td className="p-3 text-sm font-semibold text-purple-600">₹{emp.basic_salary}</td>
                                                     <td className="p-3 text-right">
                                                         <div className="flex items-center justify-end gap-2">
                                                             <button 
