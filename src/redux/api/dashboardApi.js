@@ -316,6 +316,16 @@ export const fetchStaffTasksDataApi = async (dashboardType, staffFilter = null, 
     const role = (localStorage.getItem('role') || "").toUpperCase();
     const username = localStorage.getItem('user-name');
 
+    let actualDeptFilter = departmentFilter;
+    let actualPage = page;
+    let actualLimit = limit;
+
+    if (typeof departmentFilter === 'number') {
+      actualLimit = page;
+      actualPage = departmentFilter;
+      actualDeptFilter = null;
+    }
+
     // Use selected month or current month as default
     let year, month;
     if (selectedMonth) {
@@ -368,8 +378,8 @@ export const fetchStaffTasksDataApi = async (dashboardType, staffFilter = null, 
     }
 
     // Apply department filter if provided
-    if (departmentFilter && departmentFilter !== 'all') {
-      query = query.eq('department', departmentFilter);
+    if (actualDeptFilter && actualDeptFilter !== 'all') {
+      query = query.eq('department', actualDeptFilter);
     }
 
     const { data: tasksData, error } = await query;
@@ -385,7 +395,7 @@ export const fetchStaffTasksDataApi = async (dashboardType, staffFilter = null, 
     const summary = {};
 
     tasksData.forEach(task => {
-      const key = `${task.department}-${task.name}`;
+      const key = task.name;
 
       if (!summary[key]) {
         summary[key] = {
@@ -429,42 +439,44 @@ export const fetchStaffTasksDataApi = async (dashboardType, staffFilter = null, 
       }
     });
 
-    // Fetch user images for the staff found
+    // Fetch user details for the staff found
     const uniqueNames = [...new Set(tasksData.map(t => t.name).filter(Boolean))];
-    let userImageMap = {};
+    let userDetailMap = {};
 
     if (uniqueNames.length > 0) {
-      const { data: userDataForImages, error: userError } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('user_name, profile_image')
+        .select('user_name, profile_image, department')
         .in('user_name', uniqueNames);
 
-      if (!userError && userDataForImages) {
-        userDataForImages.forEach(u => {
-          userImageMap[u.user_name] = u.profile_image;
+      if (!userError && userData) {
+        userData.forEach(u => {
+          userDetailMap[u.user_name] = {
+            profile_image: u.profile_image,
+            department: u.department
+          };
         });
       }
     }
 
     // Calculate scores and convert to array
     let staffResults = Object.values(summary).map(staff => {
-      // Overall Performance Score: (On-time tasks / Total tasks) * 100
-      // This gives 0 if nothing completed, and reflects both completion and timeliness
+      const userDetail = userDetailMap[staff.name] || {};
+      
       const performance_score = staff.total_tasks > 0
         ? Math.round((staff.total_done_on_time / staff.total_tasks) * 100)
         : 0;
 
-      // Completion rate for internal reference
       const completion_rate = staff.total_tasks > 0
         ? Math.round((staff.total_completed_tasks / staff.total_tasks) * 100)
         : 0;
 
       return {
         id: (staff.name || "unnamed").replace(/\s+/g, "-").toLowerCase(),
-        department: staff.department || "No Department",
+        department: userDetail.department || staff.department || "No Department",
         name: staff.name || "Unnamed Staff",
         email: `${(staff.name || "user").toLowerCase().replace(/\s+/g, ".")}@example.com`,
-        profile_image: userImageMap[staff.name] || null,
+        profile_image: userDetail.profile_image || null,
         total_tasks: staff.total_tasks,
         total_completed_tasks: staff.total_completed_tasks,
         total_done_on_time: staff.total_done_on_time,
@@ -477,8 +489,8 @@ export const fetchStaffTasksDataApi = async (dashboardType, staffFilter = null, 
     staffResults.sort((a, b) => b.completion_score - a.completion_score || b.total_completed_tasks - a.total_completed_tasks);
 
     // Apply pagination
-    const from = (page - 1) * limit;
-    const to = from + limit;
+    const from = (actualPage - 1) * actualLimit;
+    const to = from + actualLimit;
     const paginatedResults = staffResults.slice(from, to);
 
     console.log(`Fetched ${paginatedResults.length} staff members with task data for ${month}/${year}`);
@@ -548,7 +560,7 @@ export const getStaffTasksCountApi = async (dashboardType, staffFilter = null, d
     }
 
     // Count unique staff names
-    const uniqueStaff = new Set(data.map(item => `${item.department}-${item.name}`));
+    const uniqueStaff = new Set(data.map(item => item.name).filter(Boolean));
     console.log(`Total unique staff count for ${month}/${year}: ${uniqueStaff.size}`);
     return uniqueStaff.size;
 
